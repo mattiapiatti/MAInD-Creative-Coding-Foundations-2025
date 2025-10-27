@@ -18,17 +18,17 @@
             <span class="switch-slider">
                 <span class="icon grid-icon">
                     <svg width="20" height="20" viewBox="0 0 16 16">
-                        <rect x="1" y="1" width="6" height="6" fill="currentColor"/>
-                        <rect x="9" y="1" width="6" height="6" fill="currentColor"/>
-                        <rect x="1" y="9" width="6" height="6" fill="currentColor"/>
-                        <rect x="9" y="9" width="6" height="6" fill="currentColor"/>
+                        <rect x="1" y="1" width="6" height="6" fill="currentColor" />
+                        <rect x="9" y="1" width="6" height="6" fill="currentColor" />
+                        <rect x="1" y="9" width="6" height="6" fill="currentColor" />
+                        <rect x="9" y="9" width="6" height="6" fill="currentColor" />
                     </svg>
                 </span>
                 <span class="icon list-icon">
                     <svg width="20" height="20" viewBox="0 0 16 16">
-                        <rect x="1" y="2" width="14" height="2" fill="currentColor"/>
-                        <rect x="1" y="7" width="14" height="2" fill="currentColor"/>
-                        <rect x="1" y="12" width="14" height="2" fill="currentColor"/>
+                        <rect x="1" y="2" width="14" height="2" fill="currentColor" />
+                        <rect x="1" y="7" width="14" height="2" fill="currentColor" />
+                        <rect x="1" y="12" width="14" height="2" fill="currentColor" />
                     </svg>
                 </span>
             </span>
@@ -44,6 +44,18 @@
         <div id="editPanel" class="edit-panel">
             <div class="edit-panel-content">
                 <h2>Edit Pin</h2>
+                <div class="edit-options">
+                    <label for="editSize">Size:</label>
+                    <select id="editSize">
+                        <option value="small">Small</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="large">Large</option>
+                    </select>
+                    <label for="editBold">Bold:</label>
+                    <input type="checkbox" id="editBold">
+                    <label for="editColor">Color:</label>
+                    <input type="color" id="editColor" value="#000000">
+                </div>
                 <textarea id="editText" placeholder="Enter pin text"></textarea>
                 <div class="edit-buttons">
                     <button id="saveBtn">Save</button>

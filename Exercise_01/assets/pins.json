@@ -1,18 +1,30 @@
 [
     {
         "id": "pin1",
-        "text": "Pin 1"
+        "text": "Pin 1",
+        "size": "medium",
+        "color": "#000000",
+        "bold": false
     },
     {
         "id": "pin2",
-        "text": "Pin 2"
+        "text": "Pin 2",
+        "size": "medium",
+        "color": "#000000",
+        "bold": false
     },
     {
         "id": "pin3",
-        "text": "Pin 3"
+        "text": "Pin 3",
+        "size": "medium",
+        "color": "#000000",
+        "bold": false
     },
     {
         "id": "pin4",
-        "text": "Pin 4"
+        "text": "Pin 4",
+        "size": "medium",
+        "color": "#000000",
+        "bold": false
     }
 ]

@@ -18,12 +18,33 @@
     background-color: var(--pin-color);
     border-radius: 10px;
     overflow-wrap: break-word;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.pin.small {
+    font-size: 12px;
+    line-height: 12px;
+}
+
+.pin.medium {
+    font-size: 16px;
+    line-height: 16px;
+}
+
+.pin.large {
+    font-size: 20px;
+    line-height: 20px;
+}
+
+.pin.bold {
+    font-weight: bold;
 }
 
 /* Buttons */
 button {
     background-color: var(--secondary-color);
-    color: var(--element-color);
+    color: var(--primary-color);
     border: none;
     padding: 10px 15px;
     cursor: pointer;
@@ -67,7 +88,7 @@ button:hover {
 }
 
 .switch-slider .icon {
-    color: var(--element-color);
+    color: var(--primary-color);
     transition: opacity 0.4s;
     display: flex;
     align-items: center;
@@ -84,11 +105,11 @@ button:hover {
     opacity: 0.3;
 }
 
-.view-switch input:checked + .switch-slider .grid-icon {
+.view-switch input:checked+.switch-slider .grid-icon {
     opacity: 0.3;
 }
 
-.view-switch input:checked + .switch-slider .list-icon {
+.view-switch input:checked+.switch-slider .list-icon {
     opacity: 1;
 }
 
@@ -114,7 +135,7 @@ button:hover {
 
 .edit-panel-content {
     padding: 20px;
-    max-width: 600px;
+    display: grid;
 }
 
 .edit-panel-content h2 {
@@ -122,7 +143,6 @@ button:hover {
 }
 
 .edit-panel-content textarea {
-    width: 100%;
     height: 100px;
     padding: 10px;
     border: 1px solid var(--accent-color);
@@ -131,8 +151,87 @@ button:hover {
     resize: vertical;
 }
 
+.edit-options {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    margin: 20px 0;
+}
+
+.edit-options label {
+    font-weight: bold;
+}
+
+.edit-options select,
+.edit-options input {
+    padding: 5px;
+    border: 1px solid var(--accent-color);
+    border-radius: 5px;
+}
+
 .edit-buttons {
     display: flex;
     gap: 10px;
     margin-top: 10px;
+}
+
+/* Responsive Design */
+
+/* Tablet */
+@media (max-width: 768px) {
+.edit-panel {
+        margin: 10px;
+        left: 10px;
+        right: 10px;
+    }
+
+    .edit-panel-content {
+        padding: 15px;
+    }
+
+    .edit-panel-content h2 {
+        font-size: 1.2rem;
+    }
+
+    .edit-options {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+    .edit-options label {
+        margin-bottom: 5px;
+    }
+
+    .edit-buttons {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .edit-buttons button {
+        width: 100%;
+        padding: 12px;
+    }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+    .edit-panel {
+        margin: 5px;
+        left: 5px;
+        right: 5px;
+    }
+
+    .edit-panel-content {
+        padding: 10px;
+    }
+
+    .edit-panel-content textarea {
+        height: 80px;
+        font-size: 14px;
+    }
+
+    .edit-options {
+        margin: 15px 0;
+    }
 }
