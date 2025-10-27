@@ -24,6 +24,7 @@ function toggleView() {
     }
 }
 
+// Edit panel functions
 function openEditPanel(pinElement) {
     currentEditingPin = pinElement;
     const pinId = pinElement.id;
@@ -47,6 +48,7 @@ document.addEventListener('keydown', (event) => {
     }
 });
 
+// Save changes to pin
 function savePin() {
     if (currentEditingPin) {
         const newText = editText.value.trim();
@@ -71,6 +73,7 @@ function savePin() {
     }
 }
 
+// Load pins from JSON or localStorage
 async function loadPins() {
     const stored = localStorage.getItem('pinsState');
     if (stored) {

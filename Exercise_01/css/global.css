@@ -21,3 +21,19 @@ header {
     margin-bottom: 20px;
     height: 50px;
 }
+
+/* Mobile header adjustments */
+@media (max-width: 480px) {
+    body {
+        margin: 10px;
+    }
+
+    header {
+        margin-bottom: 15px;
+        height: 40px;
+    }
+
+    header h1 {
+        font-size: 1.5rem;
+    }
+}

@@ -179,7 +179,13 @@ button:hover {
 
 /* Tablet */
 @media (max-width: 768px) {
-.edit-panel {
+    .pinboard {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+        padding: 15px 0;
+    }
+
+    .edit-panel {
         margin: 10px;
         left: 10px;
         right: 10px;
@@ -194,9 +200,9 @@ button:hover {
     }
 
     .edit-options {
-        flex-direction: column;
+        flex-direction: row;
         gap: 10px;
-        align-items: flex-start;
+        justify-content: space-between;
     }
 
     .edit-options label {
@@ -204,7 +210,7 @@ button:hover {
     }
 
     .edit-buttons {
-        flex-direction: column;
+        flex-direction: row;
         gap: 8px;
     }
 
@@ -216,6 +222,36 @@ button:hover {
 
 /* Mobile */
 @media (max-width: 480px) {
+    .pinboard {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 10px;
+        padding: 10px 0;
+    }
+
+    .pinboard.list {
+        gap: 8px;
+    }
+
+    .pin {
+        padding: 8px;
+        font-size: 14px;
+    }
+
+    .pin.small {
+        font-size: 11px;
+        line-height: 11px;
+    }
+
+    .pin.medium {
+        font-size: 14px;
+        line-height: 14px;
+    }
+
+    .pin.large {
+        font-size: 18px;
+        line-height: 18px;
+    }
+
     .edit-panel {
         margin: 5px;
         left: 5px;
