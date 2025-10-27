@@ -6,12 +6,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PinBoard</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/global.css">
     <script src="js/script.js" defer></script>
 </head>
 
 <body>
     <header>
         <h1>PinBoard</h1>
+        <label class="view-switch">
+            <input type="checkbox" id="viewToggle">
+            <span class="switch-slider">
+                <span class="icon grid-icon">
+                    <svg width="20" height="20" viewBox="0 0 16 16">
+                        <rect x="1" y="1" width="6" height="6" fill="currentColor"/>
+                        <rect x="9" y="1" width="6" height="6" fill="currentColor"/>
+                        <rect x="1" y="9" width="6" height="6" fill="currentColor"/>
+                        <rect x="9" y="9" width="6" height="6" fill="currentColor"/>
+                    </svg>
+                </span>
+                <span class="icon list-icon">
+                    <svg width="20" height="20" viewBox="0 0 16 16">
+                        <rect x="1" y="2" width="14" height="2" fill="currentColor"/>
+                        <rect x="1" y="7" width="14" height="2" fill="currentColor"/>
+                        <rect x="1" y="12" width="14" height="2" fill="currentColor"/>
+                    </svg>
+                </span>
+            </span>
+        </label>
     </header>
     <main>
         <section class="controls">
@@ -20,6 +41,16 @@
         </section>
         <section class="pinboard">
         </section>
+        <div id="editPanel" class="edit-panel">
+            <div class="edit-panel-content">
+                <h2>Edit Pin</h2>
+                <textarea id="editText" placeholder="Enter pin text"></textarea>
+                <div class="edit-buttons">
+                    <button id="saveBtn">Save</button>
+                    <button id="cancelBtn">Cancel</button>
+                </div>
+            </div>
+        </div>
     </main>
 </body>
 

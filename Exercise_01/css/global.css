@@ -1,0 +1,23 @@
+:root {
+    --bg-color: rgb(243, 243, 243);
+    --primary-color: rgba(255, 255, 255, .6);
+    --secondary-color: #000;
+    --accent-color: #dadada;
+    --pin-color: #e8e8e8;
+    --element-color: #fff;
+    --font-family: 'helvetica Now Display', sans-serif;
+}
+
+/* Global Styles */
+body {
+    margin: 20px;
+    font-family: var(--font-family);
+    background-color: var(--bg-color);
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}

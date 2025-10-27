@@ -1,16 +1,4 @@
-:root {
-    --primary-color: #fff;
-    --secondary-color: #000;
-    --accent-color: #dadada;
-    --font-family: 'helvetica Now Display', sans-serif;
-}
-
-body {
-    margin: 20px;
-    font-family: var(--font-family);
-    background-color: var(--primary-color);
-}
-
+/* Pinboard Styles */
 .pinboard {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -18,16 +6,24 @@ body {
     padding: 20px 0;
 }
 
+.pinboard.list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
 .pin {
     border: 1px solid var(--accent-color);
     padding: 10px;
-    background-color: var(--primary-color);
+    background-color: var(--pin-color);
     border-radius: 10px;
+    overflow-wrap: break-word;
 }
 
+/* Buttons */
 button {
     background-color: var(--secondary-color);
-    color: var(--primary-color);
+    color: var(--element-color);
     border: none;
     padding: 10px 15px;
     cursor: pointer;
@@ -38,4 +34,105 @@ button {
 
 button:hover {
     background-color: var(--accent-color);
+}
+
+/* Toggle Switch */
+.view-switch {
+    position: relative;
+    display: inline-block;
+    width: 70px;
+    height: 40px;
+    cursor: pointer;
+}
+
+.view-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.switch-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--secondary-color);
+    border-radius: 40px;
+    transition: 0.4s;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10px;
+}
+
+.switch-slider .icon {
+    color: var(--element-color);
+    transition: opacity 0.4s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+}
+
+.switch-slider .grid-icon {
+    opacity: 1;
+}
+
+.switch-slider .list-icon {
+    opacity: 0.3;
+}
+
+.view-switch input:checked + .switch-slider .grid-icon {
+    opacity: 0.3;
+}
+
+.view-switch input:checked + .switch-slider .list-icon {
+    opacity: 1;
+}
+
+
+/* Edit Panel */
+.edit-panel {
+    margin: 20px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--primary-color);
+    border: 1px solid var(--accent-color);
+    border-radius: 10px;
+    transform: translateY(110%);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+}
+
+.edit-panel.open {
+    transform: translateY(0);
+}
+
+.edit-panel-content {
+    padding: 20px;
+    max-width: 600px;
+}
+
+.edit-panel-content h2 {
+    margin-top: 0;
+}
+
+.edit-panel-content textarea {
+    width: 100%;
+    height: 100px;
+    padding: 10px;
+    border: 1px solid var(--accent-color);
+    border-radius: 5px;
+    font-family: var(--font-family);
+    resize: vertical;
+}
+
+.edit-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
 }
