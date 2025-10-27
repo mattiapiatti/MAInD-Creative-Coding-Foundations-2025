@@ -102,3 +102,6 @@ No external APIs are used in this application. The application uses native brows
   - `document.createElement()` - Creates new pin elements
   - `document.querySelector()` - Selects DOM elements
   - `addEventListener()` - Attaches event handlers
+
+## Licence
+2025 (c) Mattia Piatti. All rights reserved. License: None
