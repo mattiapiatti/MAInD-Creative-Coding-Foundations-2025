@@ -1,0 +1,41 @@
+:root {
+    --primary-color: #fff;
+    --secondary-color: #000;
+    --accent-color: #dadada;
+    --font-family: 'helvetica Now Display', sans-serif;
+}
+
+body {
+    margin: 20px;
+    font-family: var(--font-family);
+    background-color: var(--primary-color);
+}
+
+.pinboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+}
+
+.pin {
+    border: 1px solid var(--accent-color);
+    padding: 10px;
+    background-color: var(--primary-color);
+    border-radius: 10px;
+}
+
+button {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 50px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: var(--accent-color);
+}
