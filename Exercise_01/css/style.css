@@ -28,6 +28,23 @@
     cursor: pointer;
 }
 
+.pin h3 {
+    margin: 0 0 5px 0;
+    font-size: inherit;
+    font-weight: bold;
+}
+
+.pin img {
+    max-width: 100%;
+    height: auto;
+    margin: 5px 0;
+    border-radius: 5px;
+}
+
+.pin p {
+    margin: 5px 0 0 0;
+}
+
 .pin.small {
     font-size: 12px;
     line-height: 12px;
