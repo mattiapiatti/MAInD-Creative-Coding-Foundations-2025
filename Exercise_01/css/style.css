@@ -1,8 +1,14 @@
+/* Controls */
+.controls {
+    display: flex;
+    gap: 10px;
+}
+
 /* Pinboard Styles */
 .pinboard {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 20px;
+    gap: 10px;
     padding: 20px 0;
 }
 
@@ -41,22 +47,6 @@
     font-weight: bold;
 }
 
-/* Buttons */
-button {
-    background-color: var(--secondary-color);
-    color: var(--primary-color);
-    border: none;
-    padding: 10px 15px;
-    cursor: pointer;
-    border-radius: 50px;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
-}
-
-button:hover {
-    background-color: var(--accent-color);
-}
-
 /* Toggle Switch */
 .view-switch {
     position: relative;
@@ -89,7 +79,7 @@ button:hover {
 
 .switch-slider .icon {
     color: var(--primary-color);
-    transition: opacity 0.4s;
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -99,20 +89,50 @@ button:hover {
 
 .switch-slider .grid-icon {
     opacity: 1;
+    transform: scale(1);
 }
 
 .switch-slider .list-icon {
-    opacity: 0.3;
+    opacity: 0.4;
+    transform: scale(0.85);
 }
 
 .view-switch input:checked+.switch-slider .grid-icon {
-    opacity: 0.3;
+    opacity: 0.4;
+    transform: scale(0.85);
 }
 
 .view-switch input:checked+.switch-slider .list-icon {
     opacity: 1;
+    transform: scale(1);
 }
 
+/* Animation keyframes */
+@keyframes moveToCenterGrid {
+    0% { transform: translateX(0px) scale(1); }
+    25% { transform: translateX(16px) scale(0.9); }
+    75% { transform: translateX(16px) scale(0.9); }
+    85% { transform: translateX(8px) scale(0.93); }
+    95% { transform: translateX(4px) scale(0.97); }
+    100% { transform: translateX(0px) scale(1); }
+}
+
+@keyframes moveToCenterList {
+    0% { transform: translateX(0px) scale(0.85); }
+    25% { transform: translateX(-16px) scale(0.9); }
+    75% { transform: translateX(-16px) scale(0.9); }
+    85% { transform: translateX(-8px) scale(0.93); }
+    95% { transform: translateX(-4px) scale(0.97); }
+    100% { transform: translateX(0px) scale(0.85); }
+}
+
+.switch-slider.animating .grid-icon {
+    animation: moveToCenterGrid 3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.switch-slider.animating .list-icon {
+    animation: moveToCenterList 3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
 
 /* Edit Panel */
 .edit-panel {
@@ -153,7 +173,7 @@ button:hover {
 
 .edit-options {
     display: flex;
-    gap: 20px;
+    gap: 10px;
     align-items: center;
     margin: 20px 0;
 }

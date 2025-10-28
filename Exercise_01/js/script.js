@@ -16,12 +16,18 @@ let isGridView = true;
 
 function toggleView() {
     const pinboard = document.querySelector('.pinboard');
+    const switchSlider = document.querySelector('.switch-slider');
     isGridView = !viewToggle.checked;
     if (isGridView) {
         pinboard.classList.remove('list');
     } else {
         pinboard.classList.add('list');
     }
+    // Add animation class
+    switchSlider.classList.add('animating');
+    setTimeout(() => {
+        switchSlider.classList.remove('animating');
+    }, 600); // Duration of animation
 }
 
 // Edit panel functions

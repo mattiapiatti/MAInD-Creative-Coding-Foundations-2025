@@ -51,8 +51,6 @@ graph TD
     Q --> K
 ```
 
-*Block diagram created with draw.io and exported as SVG*
-
 ## Functions List
 
 ### `toggleView()`

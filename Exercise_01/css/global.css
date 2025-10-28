@@ -22,6 +22,22 @@ header {
     height: 50px;
 }
 
+/* Buttons */
+button {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 50px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: var(--accent-color);
+}
+
 /* Mobile header adjustments */
 @media (max-width: 480px) {
     body {
