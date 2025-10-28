@@ -109,21 +109,55 @@
 
 /* Animation keyframes */
 @keyframes moveToCenterGrid {
-    0% { transform: translateX(0px) scale(1); }
-    25% { transform: translateX(16px) scale(0.9); }
-    75% { transform: translateX(16px) scale(0.9); }
-    85% { transform: translateX(8px) scale(0.93); }
-    95% { transform: translateX(4px) scale(0.97); }
-    100% { transform: translateX(0px) scale(1); }
+    0% {
+        transform: translateX(0px) scale(1);
+    }
+
+    25% {
+        transform: translateX(16px) scale(0.9);
+    }
+
+    75% {
+        transform: translateX(16px) scale(0.9);
+    }
+
+    85% {
+        transform: translateX(8px) scale(0.93);
+    }
+
+    95% {
+        transform: translateX(4px) scale(0.97);
+    }
+
+    100% {
+        transform: translateX(0px) scale(1);
+    }
 }
 
 @keyframes moveToCenterList {
-    0% { transform: translateX(0px) scale(0.85); }
-    25% { transform: translateX(-16px) scale(0.9); }
-    75% { transform: translateX(-16px) scale(0.9); }
-    85% { transform: translateX(-8px) scale(0.93); }
-    95% { transform: translateX(-4px) scale(0.97); }
-    100% { transform: translateX(0px) scale(0.85); }
+    0% {
+        transform: translateX(0px) scale(0.85);
+    }
+
+    25% {
+        transform: translateX(-16px) scale(0.9);
+    }
+
+    75% {
+        transform: translateX(-16px) scale(0.9);
+    }
+
+    85% {
+        transform: translateX(-8px) scale(0.93);
+    }
+
+    95% {
+        transform: translateX(-4px) scale(0.97);
+    }
+
+    100% {
+        transform: translateX(0px) scale(0.85);
+    }
 }
 
 .switch-slider.animating .grid-icon {
@@ -156,6 +190,29 @@
 .edit-panel-content {
     padding: 20px;
     display: grid;
+    position: relative;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--secondary-color);
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+}
+
+.close-btn:hover {
+    background-color: var(--accent-color);
 }
 
 .edit-panel-content h2 {
@@ -187,12 +244,24 @@
     padding: 5px;
     border: 1px solid var(--accent-color);
     border-radius: 5px;
+    cursor: pointer;
 }
 
 .edit-buttons {
     display: flex;
     gap: 10px;
     margin-top: 10px;
+}
+
+#deleteBtn {
+    background-color: var(--accent-color);
+    color: var(--accent-color-red);
+    transition: background-color 0.3s ease;
+}
+
+#deleteBtn:hover {
+    color: var(--primary-color);
+    background-color: var(--accent-color-red);
 }
 
 /* Responsive Design */

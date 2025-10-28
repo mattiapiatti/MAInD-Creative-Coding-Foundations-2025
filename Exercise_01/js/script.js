@@ -10,6 +10,8 @@ const editColor = document.getElementById('editColor');
 const editBold = document.getElementById('editBold');
 const saveBtn = document.getElementById('saveBtn');
 const cancelBtn = document.getElementById('cancelBtn');
+const closeBtn = document.getElementById('closeBtn');
+const deleteBtn = document.getElementById('deleteBtn');
 
 let currentEditingPin = null;
 let isGridView = true;
@@ -23,11 +25,10 @@ function toggleView() {
     } else {
         pinboard.classList.add('list');
     }
-    // Add animation class
     switchSlider.classList.add('animating');
     setTimeout(() => {
         switchSlider.classList.remove('animating');
-    }, 600); // Duration of animation
+    }, 600);
 }
 
 // Edit panel functions
@@ -139,3 +140,13 @@ loadPins();
 saveBtn.addEventListener('click', savePin);
 cancelBtn.addEventListener('click', closeEditPanel);
 viewToggle.addEventListener('change', toggleView);
+
+deleteBtn.addEventListener('click', () => {
+    if (currentEditingPin) {
+        const pinId = currentEditingPin.id;
+        pinsState = pinsState.filter(pin => pin.id !== pinId);
+        currentEditingPin.remove();
+        localStorage.setItem('pinsState', JSON.stringify(pinsState));
+        closeEditPanel();
+    }
+});
