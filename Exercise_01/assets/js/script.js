@@ -39,7 +39,9 @@ function openEditPanel(pinElement) {
     const pinId = pinElement.id;
     const pinData = pinsState.find(pin => pin.id === pinId);
     editTitle.value = pinData ? pinData.title || '' : '';
-    editImage.value = ''; // Reset file input
+    
+    // Don't reset file input - let user choose to keep existing or upload new
+    
     editText.value = pinElement.querySelector('p') ? pinElement.querySelector('p').textContent : pinElement.textContent;
     editSize.value = pinData ? pinData.size : 'medium';
     editColor.value = pinData ? pinData.color : '#000000';
@@ -67,12 +69,21 @@ async function savePin() {
         const newSize = editSize.value;
         const newColor = editColor.value;
         const newBold = editBold.checked;
+        
+        const pinId = currentEditingPin.id;
+        const pinData = pinsState.find(pin => pin.id === pinId);
         let newImageData = null;
+        
         const file = editImage.files[0];
         if (file) {
+            // User selected a new file
             newImageData = await readFileAsBase64(file);
+        } else if (pinData && pinData.imageData && imagePreview.style.display !== 'none') {
+            // Keep existing image if not removed
+            newImageData = pinData.imageData;
         }
-        if (newText || newTitle || newImageData) {
+        
+        if (newText || newTitle || newImageData || true) { // Always save changes
             // Update DOM
             currentEditingPin.innerHTML = '';
             if (newTitle) {
@@ -90,9 +101,8 @@ async function savePin() {
             currentEditingPin.appendChild(textEl);
             currentEditingPin.className = 'pin ' + newSize + (newBold ? ' bold' : '');
             currentEditingPin.style.color = newColor;
+            
             // Update state
-            const pinId = currentEditingPin.id;
-            const pinData = pinsState.find(pin => pin.id === pinId);
             if (pinData) {
                 pinData.title = newTitle;
                 pinData.imageData = newImageData;

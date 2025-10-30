@@ -24,7 +24,7 @@
     background-color: var(--pin-color);
     border-radius: 10px;
     overflow-wrap: break-word;
-    font-size: 16px;
+    font-size: 1rem;
     cursor: pointer;
 }
 
@@ -46,18 +46,18 @@
 }
 
 .pin.small {
-    font-size: 12px;
-    line-height: 12px;
+    font-size: 0.75rem;
+    line-height: 0.75rem;
 }
 
 .pin.medium {
-    font-size: 16px;
-    line-height: 16px;
+    font-size: 1rem;
+    line-height: 1rem;
 }
 
 .pin.large {
-    font-size: 20px;
-    line-height: 20px;
+    font-size: 1.25rem;
+    line-height: 1.25rem;
 }
 
 .pin.bold {
@@ -216,7 +216,7 @@
     right: 10px;
     background: none;
     border: none;
-    font-size: 24px;
+    font-size: 1.5rem;
     cursor: pointer;
     color: var(--secondary-color);
     padding: 0;
@@ -264,6 +264,54 @@
     cursor: pointer;
 }
 
+/* Custom Checkbox Styles */
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    user-select: none;
+}
+
+.input[type="checkbox"] {
+    display: none;
+}
+
+.custom-checkbox {
+    display: inline-block;
+    width: 20px;
+    aspect-ratio: 1/1;
+    border: 2px solid var(--accent-color);
+    border-radius: 4px;
+    position: relative;
+    cursor: pointer;
+    background-color: var(--primary-color);
+    transition: all 0.2s ease;
+}
+
+.custom-checkbox::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    background-color: var(--accent-color);
+    border-radius: 2px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.input[type="checkbox"]:checked + .custom-checkbox::after {
+    opacity: 1;
+}
+
+.checkbox-label input[type="checkbox"]:checked + .custom-checkbox {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
 .edit-buttons {
     display: flex;
     gap: 10px;
@@ -281,10 +329,15 @@
     background-color: var(--accent-color-red);
 }
 
+#deleteBtn:hover {
+    color: var(--primary-color);
+    background-color: var(--accent-color-red);
+}
+
 /* Responsive Design */
 
 /* Tablet */
-@media (max-width: 768px) {
+@media only screen and (max-width: 768px) {
     .pinboard {
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
         gap: 15px;
@@ -306,7 +359,8 @@
     }
 
     .edit-options {
-        flex-direction: row;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
         gap: 10px;
         justify-content: space-between;
     }
@@ -327,7 +381,7 @@
 }
 
 /* Mobile */
-@media (max-width: 480px) {
+@media only screen and (max-width: 480px) {
     .pinboard {
         grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
         gap: 10px;
@@ -340,22 +394,22 @@
 
     .pin {
         padding: 8px;
-        font-size: 14px;
+        font-size: 0.875rem;
     }
 
     .pin.small {
-        font-size: 11px;
-        line-height: 11px;
+        font-size: 0.6875rem;
+        line-height: 0.6875rem;
     }
 
     .pin.medium {
-        font-size: 14px;
-        line-height: 14px;
+        font-size: 0.875rem;
+        line-height: 0.875rem;
     }
 
     .pin.large {
-        font-size: 18px;
-        line-height: 18px;
+        font-size: 1.125rem;
+        line-height: 1.125rem;
     }
 
     .edit-panel {
@@ -370,10 +424,12 @@
 
     .edit-panel-content textarea {
         height: 80px;
-        font-size: 14px;
+        font-size: 0.875rem;
     }
 
     .edit-options {
+        display: grid;
         margin: 15px 0;
     }
+
 }

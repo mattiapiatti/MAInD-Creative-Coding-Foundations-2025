@@ -10,46 +10,20 @@ Starting from the concept of a pinboard, implement a web page that:
 ## Screenshots
 
 ### Grid View
-![Grid View](img/grid-view.png)
+![Grid View](assets/img/grid-view.png)
 
 ### List View
-![List View](img/list-view.png)
+![List View](assets/img/list-view.png)
 
 ### Edit Panel
-![Edit Panel](img/edit-panel.png)
+![Edit Panel](assets/img/edit-panel.png)
 
 ## Project Description
 
 The PinBoard application is an interactive web interface for managing digital notes/pins with customizable visual properties. Users can toggle between grid and list layouts, add new pins, remove existing ones, and edit pin content through a slide-up panel. The application features responsive design for mobile and tablet devices, with data persistence across browser sessions using localStorage and JSON file fallback. Functional logic includes DOM manipulation for dynamic pin creation/rendering, event handling for user interactions, and state management for pin data. Interaction modalities comprise click-to-edit pins, toggle switches for view modes, and form-based editing with real-time preview. (248 characters)
 
 ## Block Diagram
-
-```mermaid
-graph TD
-    A[User Interaction] --> B[Event Handlers]
-    B --> C{Action Type}
-    C -->|Add Pin| D[Create New Pin Object]
-    C -->|Remove Pin| E[Remove Last Pin]
-    C -->|Edit Pin| F[Open Edit Panel]
-    C -->|Toggle View| G[Switch Layout]
-    C -->|Save Changes| H[Update Pin Data]
-
-    D --> I[Update pinsState Array]
-    E --> I
-    H --> I
-
-    I --> J[Persist to localStorage]
-    J --> K[Update DOM]
-
-    L[Page Load] --> M[Load Data]
-    M --> N{Data Source}
-    N -->|localStorage| O[Parse JSON]
-    N -->|JSON File| P[Fetch assets/pins.json]
-
-    O --> Q[Render Pins]
-    P --> Q
-    Q --> K
-```
+![Map](assets/img/mermaid-diagram-2025-10-30-144543.svg)
 
 ## Functions List
 
