@@ -52,29 +52,155 @@ The PinBoard application is an interactive web interface for managing digital no
 
 ## Functions List
 
-### `toggleView()`
+### Utility Functions
+
+#### `cacheElements()`
+- **Arguments**: None
+- **Description**: Caches DOM elements into the elements object for performance
+- **Returns**: void
+
+#### `generatePinId()`
+- **Arguments**: None
+- **Description**: Generates a unique ID for new pins
+- **Returns**: string
+
+#### `validateRequiredFields(title, text)`
+- **Arguments**: `title` (string), `text` (string)
+- **Description**: Validates that title and text fields are not empty, adds error classes if invalid
+- **Returns**: boolean
+
+#### `clearValidationErrors()`
+- **Arguments**: None
+- **Description**: Removes validation error classes from title and text fields
+- **Returns**: void
+
+#### `readFileAsBase64(file)`
+- **Arguments**: `file` (File)
+- **Description**: Reads a file as base64 data URL
+- **Returns**: Promise<{data: string, type: string}>
+
+#### `resizeImage(file, maxWidth, maxHeight)`
+- **Arguments**: `file` (File), `maxWidth` (number), `maxHeight` (number)
+- **Description**: Resizes an image to fit within max dimensions and returns a blob
+- **Returns**: Promise<Blob>
+
+### Pin DOM Manipulation
+
+#### `createPinElement(pinData)`
+- **Arguments**: `pinData` (object)
+- **Description**: Creates a DOM element for a pin with title, image, text, and styles
+- **Returns**: HTMLElement
+
+#### `updatePinElement(pinElement, pinData)`
+- **Arguments**: `pinElement` (HTMLElement), `pinData` (object)
+- **Description**: Updates an existing pin DOM element with new data
+- **Returns**: void
+
+### State Management
+
+#### `addPinToState(pinData)`
+- **Arguments**: `pinData` (object)
+- **Description**: Adds a pin to the pinsState array and persists to localStorage
+- **Returns**: void
+
+#### `updatePinInState(pinId, newData)`
+- **Arguments**: `pinId` (string), `newData` (object)
+- **Description**: Updates a pin in the pinsState array and persists to localStorage
+- **Returns**: void
+
+#### `removePinFromState(pinId)`
+- **Arguments**: `pinId` (string)
+- **Description**: Removes a pin from the pinsState array and persists to localStorage
+- **Returns**: void
+
+### UI Interaction Functions
+
+#### `toggleView()`
 - **Arguments**: None
 - **Description**: Toggles between grid and list view modes by adding/removing CSS classes
 - **Returns**: void
 
-### `openEditPanel(pinElement)`
-- **Arguments**: `pinElement` (DOM element) - The pin element being edited
+#### `openEditPanel(pinElement)`
+- **Arguments**: `pinElement` (HTMLElement)
 - **Description**: Opens the edit panel and populates it with current pin data
 - **Returns**: void
 
-### `closeEditPanel()`
+#### `populateEditForm(pinData, pinElement)`
+- **Arguments**: `pinData` (object or null), `pinElement` (HTMLElement)
+- **Description**: Populates the edit form with pin data or resets for new pins
+- **Returns**: void
+
+#### `closeEditPanel()`
 - **Arguments**: None
 - **Description**: Closes the edit panel and resets editing state
 - **Returns**: void
 
-### `savePin()`
+#### `savePin()`
 - **Arguments**: None
 - **Description**: Saves changes from edit panel to pin data and updates DOM/localStorage
+- **Returns**: Promise<void>
+
+#### `processImageUpload(existingPinData)`
+- **Arguments**: `existingPinData` (object or null)
+- **Description**: Processes image upload, resizes if new file, or keeps existing
+- **Returns**: Promise<object or null>
+
+#### `deletePin()`
+- **Arguments**: None
+- **Description**: Deletes the current editing pin from state and DOM
 - **Returns**: void
 
-### `loadPins()`
+### Data Loading and Rendering
+
+#### `loadPins()`
 - **Arguments**: None
 - **Description**: Loads pin data from localStorage or JSON file and renders pins to DOM
+- **Returns**: Promise<void>
+
+#### `loadPinsFromJSON()`
+- **Arguments**: None
+- **Description**: Fetches pin data from assets/pins.json
+- **Returns**: Promise<array>
+
+#### `renderPins()`
+- **Arguments**: None
+- **Description**: Renders all pins from pinsState to the DOM
+- **Returns**: void
+
+### Pin Management
+
+#### `addNewPin()`
+- **Arguments**: None
+- **Description**: Creates a new pin and opens it for editing
+- **Returns**: void
+
+#### `removeLastPin()`
+- **Arguments**: None
+- **Description**: Removes the last pin from state and DOM
+- **Returns**: void
+
+### Event Handling
+
+#### `handleInputValidation()`
+- **Arguments**: None
+- **Description**: Adds input event listeners for real-time validation
+- **Returns**: void
+
+#### `handleKeyboardShortcuts()`
+- **Arguments**: None
+- **Description**: Adds keyboard event listeners for shortcuts (e.g., Escape to close)
+- **Returns**: void
+
+#### `setupEventListeners()`
+- **Arguments**: None
+- **Description**: Sets up all event listeners for the application
+- **Returns**: void
+
+### Initialization
+
+#### `init()`
+- **Arguments**: None
+- **Description**: Initializes the application by caching elements, setting up listeners, and loading pins
 - **Returns**: Promise<void>
 
 ## Content and Data Sources

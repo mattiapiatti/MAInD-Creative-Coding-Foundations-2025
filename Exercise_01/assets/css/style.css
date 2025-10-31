@@ -4,7 +4,13 @@
     gap: 10px;
 }
 
-/* Pinboard Styles */
+.controls button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Pinboard */
 .pinboard {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -124,7 +130,6 @@
     transform: scale(1);
 }
 
-/* Animation keyframes */
 @keyframes moveToCenterGrid {
     0% {
         transform: translateX(0px) scale(1);
@@ -210,28 +215,6 @@
     position: relative;
 }
 
-.close-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: var(--secondary-color);
-    padding: 0;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.3s ease;
-}
-
-.close-btn:hover {
-    background-color: var(--accent-color);
-}
-
 .edit-panel-content h2 {
     margin-top: 0;
 }
@@ -256,12 +239,23 @@
     font-weight: bold;
 }
 
-.edit-options select,
-.edit-options input {
+.edit-options input,
+.edit-options select {
     padding: 5px;
     border: 1px solid var(--accent-color);
     border-radius: 5px;
     cursor: pointer;
+}
+
+/* Required field validation */
+.required-field {
+    border-color: #ff4444 !important;
+    background-color: #ffeaea !important;
+}
+
+.required-field:focus {
+    outline: 2px solid #ff4444;
+    outline-offset: 1px;
 }
 
 /* Custom Checkbox Styles */
@@ -304,11 +298,11 @@
     transition: opacity 0.2s ease;
 }
 
-.input[type="checkbox"]:checked + .custom-checkbox::after {
+.input[type="checkbox"]:checked+.custom-checkbox::after {
     opacity: 1;
 }
 
-.checkbox-label input[type="checkbox"]:checked + .custom-checkbox {
+.checkbox-label input[type="checkbox"]:checked+.custom-checkbox {
     background-color: rgba(255, 255, 255, 0.1);
 }
 

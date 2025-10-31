@@ -1,123 +1,77 @@
+const STORAGE_KEY = 'pinsState';
+const DEFAULT_PIN_SIZE = 'medium';
+const DEFAULT_PIN_COLOR = '#000000';
+
+const SELECTORS = {
+    addPinBtn: 'addPinBtn',
+    removePinBtn: 'removePinBtn',
+    viewToggle: 'viewToggle',
+    editPanel: 'editPanel',
+    editTitle: 'editTitle',
+    editImage: 'editImage',
+    editText: 'editText',
+    editSize: 'editSize',
+    editColor: 'editColor',
+    editBold: 'editBold',
+    saveBtn: 'saveBtn',
+    cancelBtn: 'cancelBtn',
+    deleteBtn: 'deleteBtn',
+    pinboard: '.pinboard'
+};
+
+// Global state variables
 let pinsState = [];
-
-const addPinBtn = document.getElementById('addPinBtn');
-const removePinBtn = document.getElementById('removePinBtn');
-const viewToggle = document.getElementById('viewToggle');
-const editPanel = document.getElementById('editPanel');
-const editTitle = document.getElementById('editTitle');
-const editImage = document.getElementById('editImage');
-const editText = document.getElementById('editText');
-const editSize = document.getElementById('editSize');
-const editColor = document.getElementById('editColor');
-const editBold = document.getElementById('editBold');
-const saveBtn = document.getElementById('saveBtn');
-const cancelBtn = document.getElementById('cancelBtn');
-const closeBtn = document.getElementById('closeBtn');
-const deleteBtn = document.getElementById('deleteBtn');
-
 let currentEditingPin = null;
 let isGridView = true;
+let pinCounter = 1;
 
-function toggleView() {
-    const pinboard = document.querySelector('.pinboard');
-    const switchSlider = document.querySelector('.switch-slider');
-    isGridView = !viewToggle.checked;
-    if (isGridView) {
-        pinboard.classList.remove('list');
+const elements = {};
+
+// Cache DOM elements
+function cacheElements() {
+    Object.keys(SELECTORS).forEach(key => {
+        const selector = SELECTORS[key];
+        elements[key] = key === 'pinboard'
+            ? document.querySelector(selector)
+            : document.getElementById(selector);
+    });
+}
+
+function generatePinId() {
+    return `pin${pinCounter++}`;
+}
+
+function validateRequiredFields(title, text) {
+    const trimmedTitle = title.trim();
+    const trimmedText = text.trim();
+
+    let hasErrors = false;
+
+    if (!trimmedTitle) {
+        elements.editTitle.classList.add('required-field');
+        hasErrors = true;
     } else {
-        pinboard.classList.add('list');
+        elements.editTitle.classList.remove('required-field');
     }
-    switchSlider.classList.add('animating');
-    setTimeout(() => {
-        switchSlider.classList.remove('animating');
-    }, 600);
-}
 
-// Edit panel functions
-function openEditPanel(pinElement) {
-    currentEditingPin = pinElement;
-    const pinId = pinElement.id;
-    const pinData = pinsState.find(pin => pin.id === pinId);
-    editTitle.value = pinData ? pinData.title || '' : '';
-    
-    // Don't reset file input - let user choose to keep existing or upload new
-    
-    editText.value = pinElement.querySelector('p') ? pinElement.querySelector('p').textContent : pinElement.textContent;
-    editSize.value = pinData ? pinData.size : 'medium';
-    editColor.value = pinData ? pinData.color : '#000000';
-    editBold.checked = pinData ? pinData.bold : false;
-    editPanel.classList.add('open');
-}
-
-function closeEditPanel() {
-    editPanel.classList.remove('open');
-    currentEditingPin = null;
-}
-
-// Close panel on Escape key press
-document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && editPanel.classList.contains('open')) {
-        closeEditPanel();
+    if (!trimmedText) {
+        elements.editText.classList.add('required-field');
+        hasErrors = true;
+    } else {
+        elements.editText.classList.remove('required-field');
     }
-});
 
-// Save changes to pin
-async function savePin() {
-    if (currentEditingPin) {
-        const newTitle = editTitle.value.trim();
-        const newText = editText.value.trim();
-        const newSize = editSize.value;
-        const newColor = editColor.value;
-        const newBold = editBold.checked;
-        
-        const pinId = currentEditingPin.id;
-        const pinData = pinsState.find(pin => pin.id === pinId);
-        let newImageData = null;
-        
-        const file = editImage.files[0];
-        if (file) {
-            // User selected a new file
-            newImageData = await readFileAsBase64(file);
-        } else if (pinData && pinData.imageData && imagePreview.style.display !== 'none') {
-            // Keep existing image if not removed
-            newImageData = pinData.imageData;
-        }
-        
-        if (newText || newTitle || newImageData || true) { // Always save changes
-            // Update DOM
-            currentEditingPin.innerHTML = '';
-            if (newTitle) {
-                const titleEl = document.createElement('h3');
-                titleEl.textContent = newTitle;
-                currentEditingPin.appendChild(titleEl);
-            }
-            if (newImageData) {
-                const imgEl = document.createElement('img');
-                imgEl.src = `data:${newImageData.type};base64,${newImageData.data}`;
-                currentEditingPin.appendChild(imgEl);
-            }
-            const textEl = document.createElement('p');
-            textEl.textContent = newText;
-            currentEditingPin.appendChild(textEl);
-            currentEditingPin.className = 'pin ' + newSize + (newBold ? ' bold' : '');
-            currentEditingPin.style.color = newColor;
-            
-            // Update state
-            if (pinData) {
-                pinData.title = newTitle;
-                pinData.imageData = newImageData;
-                pinData.text = newText;
-                pinData.size = newSize;
-                pinData.color = newColor;
-                pinData.bold = newBold;
-                localStorage.setItem('pinsState', JSON.stringify(pinsState));
-            }
-        }
-        closeEditPanel();
-    }
+    return !hasErrors;
 }
 
-// Helper function to read file as base64
+function clearValidationErrors() {
+    elements.editTitle.classList.remove('required-field');
+    elements.editText.classList.remove('required-field');
+}
+
+
+
+// Utility functions for image handling
 function readFileAsBase64(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -131,87 +85,362 @@ function readFileAsBase64(file) {
     });
 }
 
-// Load pins from JSON or localStorage
-async function loadPins() {
-    const stored = localStorage.getItem('pinsState');
-    if (stored) {
-        pinsState = JSON.parse(stored);
-    } else {
-        try {
-            const response = await fetch('assets/pins.json');
-            pinsState = await response.json();
-        } catch (error) {
-            console.error('Error loading pins.json:', error);
-            pinsState = [];
-        }
-    }
-    // Populate DOM
-    const pinboard = document.querySelector('.pinboard');
-    pinboard.innerHTML = '';
-    pinsState.forEach(pinData => {
-        const pin = document.createElement('div');
-        pin.classList.add('pin', pinData.size || 'medium');
-        if (pinData.bold) pin.classList.add('bold');
-        pin.id = pinData.id;
-        if (pinData.title) {
-            const titleEl = document.createElement('h3');
-            titleEl.textContent = pinData.title;
-            pin.appendChild(titleEl);
-        }
-        if (pinData.imageData) {
-            const imgEl = document.createElement('img');
-            imgEl.src = `data:${pinData.imageData.type};base64,${pinData.imageData.data}`;
-            pin.appendChild(imgEl);
-        }
-        const textEl = document.createElement('p');
-        textEl.textContent = pinData.text;
-        pin.appendChild(textEl);
-        pin.style.color = pinData.color || '#000000';
-        pin.addEventListener('click', () => openEditPanel(pin));
-        pinboard.appendChild(pin);
+// Resize image to max dimensions
+function resizeImage(file, maxWidth, maxHeight) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            let { width, height } = img;
+            if (width > maxWidth) {
+                height = (height * maxWidth) / width;
+                width = maxWidth;
+            }
+            if (height > maxHeight) {
+                width = (width * maxHeight) / height;
+                height = maxHeight;
+            }
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+            canvas.toBlob(resolve, file.type, 0.8); // quality 0.8
+        };
+        img.src = URL.createObjectURL(file);
     });
 }
 
-addPinBtn.addEventListener('click', () => {
-    const pinCount = pinsState.length + 1;
-    const newPinData = { id: `pin${pinCount}`, title: '', imageData: null, text: `Pin ${pinCount}`, size: 'medium', color: '#000000', bold: false };
-    pinsState.push(newPinData);
-    localStorage.setItem('pinsState', JSON.stringify(pinsState));
-    // Add to DOM
-    const newPin = document.createElement('div');
-    newPin.classList.add('pin', 'medium');
-    newPin.id = newPinData.id;
-    const textEl = document.createElement('p');
-    textEl.textContent = newPinData.text;
-    newPin.appendChild(textEl);
-    newPin.style.color = '#000000';
-    newPin.addEventListener('click', () => openEditPanel(newPin));
-    document.querySelector('.pinboard').appendChild(newPin);
-});
+// Pin DOM manipulation
+function createPinElement(pinData) {
+    const pin = document.createElement('div');
+    pin.classList.add('pin', pinData.size || DEFAULT_PIN_SIZE);
+    if (pinData.bold) pin.classList.add('bold');
+    pin.id = pinData.id;
 
-removePinBtn.addEventListener('click', () => {
+    if (pinData.title) {
+        const titleEl = document.createElement('h3');
+        titleEl.textContent = pinData.title;
+        pin.appendChild(titleEl);
+    }
+
+    if (pinData.imageData) {
+        const imgEl = document.createElement('img');
+        imgEl.src = `data:${pinData.imageData.type};base64,${pinData.imageData.data}`;
+        pin.appendChild(imgEl);
+    }
+
+    const textEl = document.createElement('p');
+    textEl.textContent = pinData.text;
+    pin.appendChild(textEl);
+
+    pin.style.color = pinData.color || DEFAULT_PIN_COLOR;
+    pin.addEventListener('click', () => openEditPanel(pin));
+
+    return pin;
+}
+
+// Update pin DOM element with new data
+function updatePinElement(pinElement, pinData) {
+    pinElement.innerHTML = '';
+
+    if (pinData.title) {
+        const titleEl = document.createElement('h3');
+        titleEl.textContent = pinData.title;
+        pinElement.appendChild(titleEl);
+    }
+
+    if (pinData.imageData) {
+        const imgEl = document.createElement('img');
+        imgEl.src = `data:${pinData.imageData.type};base64,${pinData.imageData.data}`;
+        pinElement.appendChild(imgEl);
+    }
+
+    const textEl = document.createElement('p');
+    textEl.textContent = pinData.text;
+    pinElement.appendChild(textEl);
+
+    pinElement.className = 'pin ' + pinData.size + (pinData.bold ? ' bold' : '');
+    pinElement.style.color = pinData.color;
+}
+
+// State management
+function addPinToState(pinData) {
+    pinsState.push(pinData);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(pinsState));
+}
+
+function updatePinInState(pinId, newData) {
+    const pinIndex = pinsState.findIndex(pin => pin.id === pinId);
+    if (pinIndex !== -1) {
+        Object.assign(pinsState[pinIndex], newData);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(pinsState));
+    }
+}
+
+function removePinFromState(pinId) {
+    pinsState = pinsState.filter(pin => pin.id !== pinId);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(pinsState));
+}
+
+function toggleView() {
+    const pinboard = elements.pinboard;
+    const switchSlider = document.querySelector('.switch-slider');
+    isGridView = !elements.viewToggle.checked;
+
+    if (isGridView) {
+        pinboard.classList.remove('list');
+    } else {
+        pinboard.classList.add('list');
+    }
+
+    switchSlider.classList.add('animating');
+    setTimeout(() => {
+        switchSlider.classList.remove('animating');
+    }, 600);
+}
+
+function openEditPanel(pinElement) {
+    currentEditingPin = pinElement;
+    const pinId = pinElement.id;
+    const pinData = pinsState.find(pin => pin.id === pinId);
+
+    // Hide delete button for new pins (not yet saved)
+    elements.deleteBtn.style.display = pinData ? 'block' : 'none';
+
+    // Disable pin management buttons while editing
+    elements.addPinBtn.disabled = true;
+    elements.removePinBtn.disabled = true;
+    elements.pinboard.style.pointerEvents = 'none';
+
+    populateEditForm(pinData, pinElement);
+
+    elements.editPanel.classList.add('open');
+}
+
+// Populate edit form with pin data
+function populateEditForm(pinData, pinElement) {
+    if (pinData) {
+        // Existing pin
+        elements.editTitle.value = pinData.title || '';
+        elements.editText.value = pinData.text;
+        elements.editText.placeholder = '';
+        elements.editSize.value = pinData.size;
+        elements.editColor.value = pinData.color;
+        elements.editBold.checked = pinData.bold;
+        // For existing pins, don't reset image input
+    } else {
+        // New pin
+        elements.editTitle.value = '';
+        elements.editText.value = '';
+        elements.editText.placeholder = `Pin ${parseInt(pinElement.id.slice(3))}`;
+        // Reset image input for new pins
+        const newFileInput = document.createElement('input');
+        newFileInput.type = 'file';
+        newFileInput.id = 'editImage';
+        newFileInput.accept = 'image/*';
+        elements.editImage.parentNode.replaceChild(newFileInput, elements.editImage);
+        elements.editImage = newFileInput;
+        elements.editSize.value = DEFAULT_PIN_SIZE;
+        elements.editColor.value = DEFAULT_PIN_COLOR;
+        elements.editBold.checked = false;
+    }
+}
+
+function closeEditPanel() {
+    // If editing a new unsaved pin, remove it from DOM
+    if (currentEditingPin) {
+        const pinId = currentEditingPin.id;
+        const pinExists = pinsState.some(pin => pin.id === pinId);
+        if (!pinExists) {
+            currentEditingPin.remove();
+        }
+    }
+
+    // Re-enable pin management buttons
+    elements.addPinBtn.disabled = false;
+    elements.removePinBtn.disabled = false;
+    elements.pinboard.style.pointerEvents = 'auto';
+
+
+    elements.editPanel.classList.remove('open');
+    currentEditingPin = null;
+}
+
+async function savePin() {
+    if (!currentEditingPin) return;
+
+    clearValidationErrors();
+
+    const newTitle = elements.editTitle.value.trim();
+    const newText = elements.editText.value.trim();
+
+    if (!validateRequiredFields(newTitle, newText)) {
+        return;
+    }
+
+    const newSize = elements.editSize.value;
+    const newColor = elements.editColor.value;
+    const newBold = elements.editBold.checked;
+
+    const pinId = currentEditingPin.id;
+    const existingPinData = pinsState.find(pin => pin.id === pinId);
+
+    let newImageData = null;
+    try {
+        newImageData = await processImageUpload(existingPinData);
+    } catch (error) {
+        console.error('Error processing image:', error);
+        alert('Error processing image. Please try again.');
+        newImageData = null;
+    }
+
+    const newPinData = {
+        id: pinId,
+        title: newTitle,
+        imageData: newImageData,
+        text: newText,
+        size: newSize,
+        color: newColor,
+        bold: newBold
+    };
+
+    updatePinElement(currentEditingPin, newPinData);
+
+    if (existingPinData) {
+        updatePinInState(pinId, newPinData);
+    } else {
+        addPinToState(newPinData);
+    }
+
+    closeEditPanel();
+}
+
+// Process image upload or removal
+async function processImageUpload(existingPinData) {
+    const file = elements.editImage.files[0];
+    if (file) {
+        const resizedBlob = await resizeImage(file, 300, 300);
+        return await readFileAsBase64(resizedBlob);
+    }
+
+    return existingPinData?.imageData || null;
+}
+
+function deletePin() {
+    if (!currentEditingPin) return;
+
+    const pinId = currentEditingPin.id;
+    removePinFromState(pinId);
+    currentEditingPin.remove();
+    closeEditPanel();
+}
+
+async function loadPins() {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+        pinsState = JSON.parse(stored);
+    } else {
+        await loadPinsFromJSON();
+    }
+
+    // Set pinCounter to the next available number
+    if (pinsState.length > 0) {
+        const maxId = Math.max(...pinsState.map(pin => parseInt(pin.id.slice(3))));
+        pinCounter = maxId + 1;
+    } else {
+        pinCounter = 1;
+    }
+
+    renderPins();
+}
+
+async function loadPinsFromJSON() {
+    try {
+        const response = await fetch('assets/pins.json');
+        pinsState = await response.json();
+    } catch (error) {
+        console.error('Error loading pins.json:', error);
+        pinsState = [];
+    }
+}
+
+function renderPins() {
+    const pinboard = elements.pinboard;
+    pinboard.innerHTML = '';
+
+    pinsState.forEach(pinData => {
+        const pinElement = createPinElement(pinData);
+        pinboard.appendChild(pinElement);
+    });
+}
+
+function addNewPin() {
+    const newPinId = generatePinId();
+    const pinNumber = parseInt(newPinId.slice(3));
+    const newPinData = {
+        id: newPinId,
+        title: '',
+        text: `Pin ${pinNumber}`,
+        size: DEFAULT_PIN_SIZE,
+        color: DEFAULT_PIN_COLOR,
+        bold: false
+    };
+
+    const newPinElement = createPinElement(newPinData);
+    elements.pinboard.appendChild(newPinElement);
+    openEditPanel(newPinElement);
+}
+
+function removeLastPin() {
     if (pinsState.length > 0) {
         pinsState.pop();
-        localStorage.setItem('pinsState', JSON.stringify(pinsState));
-        // Remove from DOM
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(pinsState));
+
         const pins = document.querySelectorAll('.pin');
         pins[pins.length - 1].remove();
     }
-});
+}
 
-// Load pins on page load
-loadPins();
+function handleInputValidation() {
+    elements.editTitle.addEventListener('input', () => {
+        if (elements.editTitle.value.trim()) {
+            elements.editTitle.classList.remove('required-field');
+        }
+    });
 
-saveBtn.addEventListener('click', savePin);
-cancelBtn.addEventListener('click', closeEditPanel);
-viewToggle.addEventListener('change', toggleView);
+    elements.editText.addEventListener('input', () => {
+        if (elements.editText.value.trim()) {
+            elements.editText.classList.remove('required-field');
+        }
+    });
+}
 
-deleteBtn.addEventListener('click', () => {
-    if (currentEditingPin) {
-        const pinId = currentEditingPin.id;
-        pinsState = pinsState.filter(pin => pin.id !== pinId);
-        currentEditingPin.remove();
-        localStorage.setItem('pinsState', JSON.stringify(pinsState));
-        closeEditPanel();
-    }
-});
+function handleKeyboardShortcuts() {
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && elements.editPanel.classList.contains('open')) {
+            closeEditPanel();
+        }
+    });
+}
+
+function setupEventListeners() {
+    elements.addPinBtn.addEventListener('click', addNewPin);
+    elements.removePinBtn.addEventListener('click', removeLastPin);
+
+    elements.viewToggle.addEventListener('change', toggleView);
+
+    elements.saveBtn.addEventListener('click', savePin);
+    elements.cancelBtn.addEventListener('click', closeEditPanel);
+    elements.deleteBtn.addEventListener('click', deletePin);
+
+    handleInputValidation();
+    handleKeyboardShortcuts();
+}
+
+async function init() {
+    cacheElements();
+    setupEventListeners();
+    await loadPins();
+}
+
+document.addEventListener('DOMContentLoaded', init);

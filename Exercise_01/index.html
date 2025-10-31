@@ -37,7 +37,7 @@
     <main>
         <section class="controls">
             <button id="addPinBtn">Add Pin</button>
-            <button id="removePinBtn">Remove Pin</button>
+            <button id="removePinBtn">Remove Last Pin</button>
         </section>
         <section class="pinboard">
         </section>
@@ -45,8 +45,8 @@
             <div class="edit-panel-content">
                 <h2>Edit Pin</h2>
                 <div class="edit-options">
-                    <label for="editTitle">Title:</label>
-                    <input type="text" id="editTitle" placeholder="Enter pin title">
+                    <label for="editTitle">Title: <span style="color: #ff4444;">*</span></label>
+                    <input type="text" id="editTitle" placeholder="Enter pin title (required)">
                     <label for="editImage">Image:</label>
                     <input type="file" id="editImage" accept="image/*">
                     <label for="editSize">Size:</label>
@@ -60,12 +60,13 @@
                         <input type="checkbox" id="editBold" class="input">
                         <span class="custom-checkbox"></span>
                     </label>
-                    <label for="editColor">Color: 
+                    <label for="editColor">Color:
                         <input type="color" id="editColor" value="#000000">
                     </label>
 
                 </div>
-                <textarea id="editText" placeholder="Enter pin text"></textarea>
+                <label for="editText">Text: <span style="color: #ff4444;">*</span></label>
+                <textarea id="editText" placeholder="Enter pin text (required)"></textarea>
                 <div class="edit-buttons">
                     <button id="saveBtn">Save</button>
                     <button id="cancelBtn">Cancel</button>
