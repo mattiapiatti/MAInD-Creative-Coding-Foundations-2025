@@ -7,6 +7,7 @@ const SELECTORS = {
     removePinBtn: 'removePinBtn',
     viewToggle: 'viewToggle',
     editPanel: 'editPanel',
+    editPanelTitle: 'editPanelTitle',
     editTitle: 'editTitle',
     editImage: 'editImage',
     editText: 'editText',
@@ -163,10 +164,24 @@ function updatePinElement(pinElement, pinData) {
     pinElement.style.color = pinData.color;
 }
 
+// Renumber pins consecutively
+function renumberPins() {
+    pinsState.forEach((pin, index) => {
+        pin.id = `pin${index + 1}`;
+    });
+    pinCounter = pinsState.length + 1;
+    // Update DOM ids
+    const pins = document.querySelectorAll('.pin');
+    pins.forEach((pinEl, index) => {
+        pinEl.id = `pin${index + 1}`;
+    });
+}
+
 // State management
 function addPinToState(pinData) {
     pinsState.push(pinData);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(pinsState));
+    renumberPins();
 }
 
 function updatePinInState(pinId, newData) {
@@ -180,6 +195,7 @@ function updatePinInState(pinId, newData) {
 function removePinFromState(pinId) {
     pinsState = pinsState.filter(pin => pin.id !== pinId);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(pinsState));
+    renumberPins();
 }
 
 function toggleView() {
@@ -203,6 +219,11 @@ function openEditPanel(pinElement) {
     currentEditingPin = pinElement;
     const pinId = pinElement.id;
     const pinData = pinsState.find(pin => pin.id === pinId);
+
+    // Set panel title if element exists
+    if (elements.editPanelTitle) {
+        elements.editPanelTitle.textContent = pinData ? 'Edit pin' : 'Add pin';
+    }
 
     // Hide delete button for new pins (not yet saved)
     elements.deleteBtn.style.display = pinData ? 'block' : 'none';
@@ -247,12 +268,12 @@ function populateEditForm(pinData, pinElement) {
 }
 
 function closeEditPanel() {
-    // If editing a new unsaved pin, remove it from DOM
     if (currentEditingPin) {
         const pinId = currentEditingPin.id;
         const pinExists = pinsState.some(pin => pin.id === pinId);
         if (!pinExists) {
             currentEditingPin.remove();
+            pinCounter--;
         }
     }
 
@@ -332,6 +353,7 @@ function deletePin() {
     const pinId = currentEditingPin.id;
     removePinFromState(pinId);
     currentEditingPin.remove();
+
     closeEditPanel();
 }
 
@@ -343,13 +365,7 @@ async function loadPins() {
         await loadPinsFromJSON();
     }
 
-    // Set pinCounter to the next available number
-    if (pinsState.length > 0) {
-        const maxId = Math.max(...pinsState.map(pin => parseInt(pin.id.slice(3))));
-        pinCounter = maxId + 1;
-    } else {
-        pinCounter = 1;
-    }
+    renumberPins();
 
     renderPins();
 }
@@ -398,6 +414,8 @@ function removeLastPin() {
 
         const pins = document.querySelectorAll('.pin');
         pins[pins.length - 1].remove();
+
+        renumberPins();
     }
 }
 
