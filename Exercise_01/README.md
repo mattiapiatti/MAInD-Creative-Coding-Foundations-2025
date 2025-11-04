@@ -10,13 +10,13 @@ Starting from the concept of a pinboard, implement a web page that:
 ## Screenshots
 
 ### Grid View
-![Grid View](assets/img/Grid-view.png)
+![Grid View](doc/img/grid-view.png)
 
 ### List View
-![List View](assets/img/list-view.png)
+![List View](doc/img/list-view.png)
 
 ### Edit Panel
-![Edit Panel](assets/img/edit-panel.png)
+![Edit Panel](doc/img/edit-panel.png)
 
 ## Project Description
 
@@ -111,6 +111,11 @@ The PinBoard application is an interactive web interface for managing digital no
 #### `removePinFromState(pinId)`
 - **Arguments**: `pinId` (string)
 - **Description**: Removes a pin from the pinsState array and persists to localStorage
+- **Returns**: void
+
+#### `renumberPins()`
+- **Arguments**: None
+- **Description**: Renumbers pins consecutively after additions or removals, updating IDs in pinsState and DOM
 - **Returns**: void
 
 ### UI Interaction Functions
