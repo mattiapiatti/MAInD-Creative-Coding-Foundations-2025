@@ -7,7 +7,7 @@
 **Teachers**: Marco Lurati, Giovanni Profeta
 
 **Assistants**: Luca Draisci
-
+ 
 # Goals
 
 ***Acquire the fundamental knowledge of coding principles and terminology to be able to work in an interdisciplinary team in different design fields***
