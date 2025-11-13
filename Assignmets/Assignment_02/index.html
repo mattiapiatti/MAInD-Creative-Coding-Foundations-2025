@@ -12,18 +12,44 @@
 </head>
 
 <body>
-    <div class="main-container">
+
+    <div id="avatarSelection" class="avatar-selection">
+        <img class="logo" src="assets/img/logo.svg" alt="Game Logo">
+        <h1>SELECT YOUR CHARACTER</h1>
+        <div class="avatar-options">
+            <button class="avatar-btn" data-avatar="classic">
+                <canvas class="avatar-preview" id="avatar1"></canvas>
+                <span>Classic</span>
+            </button>
+            <button class="avatar-btn" data-avatar="round">
+                <canvas class="avatar-preview" id="avatar2"></canvas>
+                <span>Round</span>
+            </button>
+            <button class="avatar-btn" data-avatar="minimal">
+                <canvas class="avatar-preview" id="avatar3"></canvas>
+                <span>Minimal</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="main-container hidden">
         <img class="logo" src="assets/img/logo.svg" alt="Game Logo">
         <div class="game-container">
             <canvas id="gameCanvas"></canvas>
             <div id="gameOver" class="game-over hidden">
                 <h1>GAME OVER</h1>
                 <p>Press SPACE or TAP <br> to restart</p>
+                <br>
+                <p id="exit">← Exit</p>
             </div>
             <div id="score" class="score">0</div>
         </div>
         <p class="instructions"></p>
     </div>
+
+    <audio id="jumpSound" src="assets/audio/jump.wav"></audio>
+    <audio id="gameOverSound" src="assets/audio/gameover.wav"></audio>
+    <audio id="selectSound" src="assets/audio/select.wav"></audio>
 </body>
 
 </html>

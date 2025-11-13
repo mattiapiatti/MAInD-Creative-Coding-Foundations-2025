@@ -16,18 +16,6 @@
     --color-black: #000;
 }
 
-@media (max-width: 768px) {
-    :root {
-        --font-size-base: 14px;
-        --font-size-xl: 4rem;
-        --spacing-medium: 1rem;
-        --spacing-large: 1.5rem;
-        --canvas-width: 300px;
-        --canvas-height: 500px;
-        --border-radius: 15px;
-    }
-}
-
 * {
     margin: 0;
     padding: 0;
@@ -39,8 +27,22 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
     background: var(--color-gray);
     padding: var(--spacing-small);
-    cursor: none;
+}
+
+@media (max-width: 768px) {
+    :root {
+        --font-size-base: 14px;
+        --font-size-xl: 4rem;
+        --spacing-medium: 1rem;
+        --spacing-large: 1.5rem;
+        --canvas-width: 300px;
+        --canvas-height: 500px;
+        --border-radius: 15px;
+    }
+
+    body {
+        min-height: 100vh;
+    }
 }

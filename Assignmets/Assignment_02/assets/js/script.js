@@ -9,10 +9,16 @@ const colorBeige = rootStyles.getPropertyValue('--color-beige').trim();
 const colorGray = rootStyles.getPropertyValue('--color-gray').trim();
 const colorBlack = rootStyles.getPropertyValue('--color-black').trim();
 
+const jumpSound = document.getElementById('jumpSound');
+const gameOverSound = document.getElementById('gameOverSound');
+const selectSound = document.getElementById('selectSound');
+
+let selectedAvatar = 'classic';
 let gameRunning = false;
 let score = 0;
 let gameSpeed = 5;
 let gravity = 0.6;
+let controlsDisabled = false;
 
 const character = {
     x: 80,
@@ -66,6 +72,91 @@ function setCanvasSize() {
 setCanvasSize();
 window.addEventListener('resize', setCanvasSize);
 
+// Avatar selection
+function initAvatarSelection() {
+    const avatarBtns = document.querySelectorAll('.avatar-btn');
+
+    avatarBtns.forEach((btn, index) => {
+        const previewCanvas = btn.querySelector('.avatar-preview');
+        const previewCtx = previewCanvas.getContext('2d');
+        const avatarType = btn.dataset.avatar;
+
+        drawAvatarPreview(previewCtx, avatarType);
+
+        btn.addEventListener('click', () => {
+            selectedAvatar = avatarType;
+            playSound(selectSound);
+            document.querySelector('.avatar-selection').classList.add('hidden');
+            document.querySelector('.main-container').classList.remove('hidden');
+            setCanvasSize();
+        });
+    });
+}
+
+// Draw avatar preview
+function drawAvatarPreview(ctx, type) {
+    ctx.strokeStyle = colorBlack;
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    if (type === 'classic') {
+        ctx.beginPath();
+        ctx.arc(60, 50, 20, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(70, 40);
+        ctx.lineTo(70, 50);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(65, 45);
+        ctx.lineTo(75, 45);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(50, 70);
+        ctx.lineTo(50, 85);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(70, 70);
+        ctx.lineTo(70, 85);
+        ctx.stroke();
+    } else if (type === 'round') {
+        ctx.beginPath();
+        ctx.arc(60, 60, 25, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(55, 55, 3, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(65, 55, 3, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(60, 68, 10, 0, Math.PI);
+        ctx.stroke();
+    } else if (type === 'minimal') {
+        ctx.beginPath();
+        ctx.moveTo(60, 40);
+        ctx.lineTo(60, 80);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(45, 55);
+        ctx.lineTo(75, 55);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(60, 40, 5, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+}
+
 // Draw character
 function drawCharacter() {
     ctx.save();
@@ -75,39 +166,73 @@ function drawCharacter() {
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
-    if (character.ducking && !character.jumping) {
+    if (selectedAvatar === 'classic') {
+        if (character.ducking && !character.jumping) {
+            ctx.beginPath();
+            ctx.arc(character.x + 20, character.y + 20, 12, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(character.x + 32, character.y + 16);
+            ctx.lineTo(character.x + 32, character.y + 24);
+            ctx.stroke();
+        } else {
+            ctx.beginPath();
+            ctx.arc(character.x + 16, character.y + 16, 16, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(character.x + 24, character.y + 8);
+            ctx.lineTo(character.x + 24, character.y + 16);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(character.x + 20, character.y + 12);
+            ctx.lineTo(character.x + 28, character.y + 12);
+            ctx.stroke();
+
+            const legOffset = Math.floor(frameCount / 8) % 2 === 0 ? 0 : 3;
+            ctx.beginPath();
+            ctx.moveTo(character.x + 8, character.y + 32);
+            ctx.lineTo(character.x + 8, character.y + 42 + legOffset);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(character.x + 24, character.y + 32);
+            ctx.lineTo(character.x + 24, character.y + 42 - legOffset);
+            ctx.stroke();
+        }
+    } else if (selectedAvatar === 'round') {
+        const size = character.ducking ? 18 : 20;
         ctx.beginPath();
-        ctx.arc(character.x + 20, character.y + 20, 12, 0, Math.PI * 2);
+        ctx.arc(character.x + 16, character.y + size, size, 0, Math.PI * 2);
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.moveTo(character.x + 32, character.y + 16);
-        ctx.lineTo(character.x + 32, character.y + 24);
-        ctx.stroke();
-    } else {
-        ctx.beginPath();
-        ctx.arc(character.x + 16, character.y + 16, 16, 0, Math.PI * 2);
+        ctx.arc(character.x + 12, character.y + size - 5, 2, 0, Math.PI * 2);
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.moveTo(character.x + 24, character.y + 8);
-        ctx.lineTo(character.x + 24, character.y + 16);
+        ctx.arc(character.x + 20, character.y + size - 5, 2, 0, Math.PI * 2);
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.moveTo(character.x + 20, character.y + 12);
-        ctx.lineTo(character.x + 28, character.y + 12);
+        ctx.arc(character.x + 16, character.y + size + 5, 8, 0, Math.PI);
+        ctx.stroke();
+    } else if (selectedAvatar === 'minimal') {
+        const height = character.ducking ? 25 : 35;
+        ctx.beginPath();
+        ctx.moveTo(character.x + 16, character.y + 5);
+        ctx.lineTo(character.x + 16, character.y + height);
         ctx.stroke();
 
-        const legOffset = Math.floor(frameCount / 8) % 2 === 0 ? 0 : 3;
         ctx.beginPath();
-        ctx.moveTo(character.x + 8, character.y + 32);
-        ctx.lineTo(character.x + 8, character.y + 42 + legOffset);
+        ctx.moveTo(character.x + 5, character.y + 15);
+        ctx.lineTo(character.x + 27, character.y + 15);
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.moveTo(character.x + 24, character.y + 32);
-        ctx.lineTo(character.x + 24, character.y + 42 - legOffset);
+        ctx.arc(character.x + 16, character.y + 5, 4, 0, Math.PI * 2);
         ctx.stroke();
     }
 
@@ -269,6 +394,7 @@ function jump() {
     if (!character.jumping && !character.ducking) {
         character.velocityY = -12;
         character.jumping = true;
+        playSound(jumpSound);
     }
 }
 
@@ -317,8 +443,10 @@ function checkCollision() {
 // Update score
 function updateScore() {
     if (gameRunning) {
+        const oldScore = Math.floor(score / 10);
         score++;
-        scoreElement.textContent = Math.floor(score / 10);
+        const newScore = Math.floor(score / 10);
+        scoreElement.textContent = newScore;
 
         if (score % 500 === 0) {
             gameSpeed += 0.5;
@@ -330,10 +458,19 @@ function updateScore() {
 // Game over
 function gameOver() {
     gameRunning = false;
+    controlsDisabled = true;
     gameOverElement.classList.remove('hidden');
     canvas.style.filter = 'brightness(0.5)';
     canvas.classList.add('shake');
+    playSound(gameOverSound);
     setTimeout(() => canvas.classList.remove('shake'), 500);
+    setTimeout(() => controlsDisabled = false, 1000);
+}
+
+// Play sound
+function playSound(audio) {
+    audio.currentTime = 0;
+    audio.play().catch(e => console.log('Audio play failed:', e));
 }
 
 // Reset game
@@ -351,7 +488,7 @@ function resetGame() {
     character.jumping = false;
     character.ducking = false;
     gameOverElement.classList.add('hidden');
-    document.querySelector('.instructions').classList.add('hidden');
+    document.querySelector('.instructions').style.visibility = 'hidden';
     canvas.style.filter = '';
     scoreElement.textContent = '0';
 }
@@ -385,6 +522,7 @@ function gameLoop() {
 document.addEventListener('keydown', (e) => {
     if (e.code === 'Space') {
         e.preventDefault();
+        if (controlsDisabled) return;
         if (!gameRunning) {
             resetGame();
         } else {
@@ -406,6 +544,7 @@ document.addEventListener('keyup', (e) => {
 
 canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
+    if (controlsDisabled) return;
     if (!gameRunning) {
         resetGame();
     } else {
@@ -417,5 +556,28 @@ canvas.addEventListener('touchend', (e) => {
     e.preventDefault();
 });
 
-// Start game
+// Exit to avatar selection
+document.getElementById('exit').addEventListener('click', () => {
+    document.querySelector('.main-container').classList.add('hidden');
+    document.querySelector('.avatar-selection').classList.remove('hidden');
+    gameRunning = false;
+    controlsDisabled = false;
+    gameOverElement.classList.add('hidden');
+    canvas.style.filter = '';
+    document.querySelector('.instructions').style.visibility = 'visible';
+    obstacles = [];
+    clouds = [];
+    frameCount = 0;
+    score = 0;
+    gameSpeed = 5;
+    obstacleFrequency = 150;
+    scoreElement.textContent = '0';
+    character.y = canvas.height - 100;
+    character.velocityY = 0;
+    character.jumping = false;
+    character.ducking = false;
+});
+
+// Initialize
+initAvatarSelection();
 gameLoop();
