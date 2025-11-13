@@ -3,21 +3,25 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dinosaur Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>OFFLINE</title>
     <link rel="stylesheet" href="assets/css/global.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <script src="assets/js/script.js" defer></script>
+    <link rel="icon" href="assets/img/favicon.svg" type="image/x-icon">
 </head>
 
 <body>
-    <div class="game-container">
-        <canvas id="gameCanvas"></canvas>
-        <div id="gameOver" class="game-over hidden">
-            <h1>GAME OVER</h1>
-            <p>Press SPACE to restart</p>
+    <div class="main-container">
+        <img class="logo" src="assets/img/logo.svg" alt="Game Logo">
+        <div class="game-container">
+            <canvas id="gameCanvas"></canvas>
+            <div id="gameOver" class="game-over hidden">
+                <h1>GAME OVER</h1>
+                <p>Press SPACE to restart</p>
+            </div>
+            <div id="score" class="score">0</div>
         </div>
-        <div id="score" class="score">0</div>
     </div>
 </body>
 
