@@ -21,21 +21,6 @@ Choose a "mini-game" to rebuild with HTML, CSS and JavaScript. The requirements 
 
 OFFLINE is an endless runner game featuring three playable characters with jump and duck mechanics, including double jump. The game uses HTML5 Canvas for rendering with a minimalist hand-drawn aesthetic. The game loop manages physics, obstacle generation, collision detection, and score tracking with adaptive difficulty. Responsive design supports both keyboard (Space/Arrow Down/ESC) and touch controls, with optimized parameters for mobile/desktop. Sound effects enhance gameplay, while clean UI manages avatar selection, gameplay, and game over states.
 
-## Screenshots
-
-### Grid View
-![Grid View](doc/img/grid-view.png)
-
-### List View
-![List View](doc/img/list-view.png)
-
-### Edit Panel
-![Edit Panel](doc/img/edit-panel.png)
-
-## Project Description
-
-The PinBoard application is an interactive web interface for managing digital notes/pins with customizable visual properties. Users can toggle between grid and list layouts, add new pins, remove existing ones, and edit pin content through a slide-up panel. The application features responsive design for mobile and tablet devices, with data persistence across browser sessions using localStorage and JSON file fallback. Functional logic includes DOM manipulation for dynamic pin creation/rendering, event handling for user interactions, and state management for pin data. Interaction modalities comprise click-to-edit pins, toggle switches for view modes, and form-based editing with real-time preview. (248 characters)
-
 ## Block Diagram
 ```mermaid
 graph TD
