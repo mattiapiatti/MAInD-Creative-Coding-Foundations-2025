@@ -1,4 +1,4 @@
-# Exercise 01: PinBoard Interactive Web Application
+# Assignment 01: PinBoard Interactive Web Application
 
 ## Brief
 Starting from the concept of a pinboard, implement a web page that:

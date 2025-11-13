@@ -1,6 +1,4 @@
-// ============================================
-// DOM ELEMENTS & CONSTANTS
-// ============================================
+// DOM Elements & Constants
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreElement = document.getElementById('score');
@@ -47,9 +45,7 @@ const GAME_CONFIG = {
     }
 };
 
-// ============================================
-// GAME STATE
-// ============================================
+// Game State
 let selectedAvatar = 'classic';
 let gameRunning = false;
 let score = 0;
@@ -67,7 +63,9 @@ const character = {
     height: 32,
     velocityY: 0,
     jumping: false,
-    ducking: false
+    ducking: false,
+    jumpsRemaining: 2,
+    maxJumps: 2
 };
 
 const ground = {
@@ -78,9 +76,7 @@ const ground = {
 let obstacles = [];
 let clouds = [];
 
-// ============================================
-// INITIALIZATION & CONFIGURATION
-// ============================================
+// Initialization & Configuration
 function setCanvasSize() {
     isMobile = window.innerWidth <= 768;
     const config = isMobile ? GAME_CONFIG.mobile : GAME_CONFIG.desktop;
@@ -135,13 +131,12 @@ function exitToAvatarSelection() {
     character.velocityY = 0;
     character.jumping = false;
     character.ducking = false;
+    character.jumpsRemaining = character.maxJumps;
     
     setCanvasSize();
 }
 
-// ============================================
-// AVATAR SELECTION
-// ============================================
+// Avatar Selection
 function initAvatarSelection() {
     const avatarBtns = document.querySelectorAll('.avatar-btn');
 
@@ -258,9 +253,9 @@ function drawMinimalAvatar(ctx, centerX, centerY, scale) {
     ctx.beginPath();
     ctx.arc(centerX, centerY - 20 * scale, 5 * scale, 0, Math.PI * 2);
     ctx.stroke();
-}// ============================================
-// DRAWING FUNCTIONS
-// ============================================
+}
+
+// Drawing Functions
 function drawCharacter() {
     ctx.save();
     ctx.strokeStyle = COLORS.black;
@@ -471,9 +466,7 @@ function drawClouds() {
     });
 }
 
-// ============================================
-// UPDATE FUNCTIONS
-// ============================================
+// Update Functions
 function createObstacle() {
     const type = Math.random() > 0.5 ? 'pipe' : 'goomba';
     obstacles.push({
@@ -527,18 +520,18 @@ function updateCharacter() {
         character.y = groundLevel;
         character.velocityY = 0;
         character.jumping = false;
+        character.jumpsRemaining = character.maxJumps;
     }
 }
 
-// ============================================
-// CHARACTER ACTIONS
-// ============================================
+// Character Actions
 function jump() {
-    if (character.jumping || character.ducking) return;
+    if (character.ducking || character.jumpsRemaining <= 0) return;
 
     const config = isMobile ? GAME_CONFIG.mobile : GAME_CONFIG.desktop;
     character.velocityY = config.jumpVelocity;
     character.jumping = true;
+    character.jumpsRemaining--;
     playSound(SOUNDS.jump);
 }
 
@@ -548,9 +541,7 @@ function duck(isDucking) {
     }
 }
 
-// ============================================
-// GAME LOGIC
-// ============================================
+// Game Logic
 function checkCollision() {
     const characterBox = {
         x: character.x + 5,
@@ -612,6 +603,7 @@ function resetGame() {
     character.velocityY = 0;
     character.jumping = false;
     character.ducking = false;
+    character.jumpsRemaining = character.maxJumps;
     
     gameOverElement.classList.add('hidden');
     document.querySelector('.instructions').style.visibility = 'hidden';
@@ -619,9 +611,7 @@ function resetGame() {
     scoreElement.textContent = '0';
 }
 
-// ============================================
-// GAME LOOP
-// ============================================
+// Game Loop
 function gameLoop() {
     // Clear and draw background
     ctx.fillStyle = COLORS.red;
@@ -649,9 +639,7 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
-// ============================================
-// EVENT HANDLERS
-// ============================================
+// Event Handlers
 function handleKeyDown(e) {
     if (e.code === 'Escape') {
         e.preventDefault();
@@ -698,9 +686,7 @@ function handleTouchEnd(e) {
     e.preventDefault();
 }
 
-// ============================================
-// INITIALIZATION
-// ============================================
+// Initialization
 function init() {
     setCanvasSize();
     initAvatarSelection();
