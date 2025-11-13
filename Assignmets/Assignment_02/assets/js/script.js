@@ -1,24 +1,64 @@
+// ============================================
+// DOM ELEMENTS & CONSTANTS
+// ============================================
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreElement = document.getElementById('score');
 const gameOverElement = document.getElementById('gameOver');
 
 const rootStyles = getComputedStyle(document.documentElement);
-const colorRed = rootStyles.getPropertyValue('--color-red').trim();
-const colorBeige = rootStyles.getPropertyValue('--color-beige').trim();
-const colorGray = rootStyles.getPropertyValue('--color-gray').trim();
-const colorBlack = rootStyles.getPropertyValue('--color-black').trim();
+const COLORS = {
+    red: rootStyles.getPropertyValue('--color-red').trim(),
+    beige: rootStyles.getPropertyValue('--color-beige').trim(),
+    gray: rootStyles.getPropertyValue('--color-gray').trim(),
+    black: rootStyles.getPropertyValue('--color-black').trim()
+};
 
-const jumpSound = document.getElementById('jumpSound');
-const gameOverSound = document.getElementById('gameOverSound');
-const selectSound = document.getElementById('selectSound');
+const SOUNDS = {
+    jump: document.getElementById('jumpSound'),
+    gameOver: document.getElementById('gameOverSound'),
+    select: document.getElementById('selectSound')
+};
 
+const GAME_CONFIG = {
+    desktop: {
+        width: 800,
+        height: 400,
+        characterX: 80,
+        gameSpeed: 5,
+        gravity: 0.6,
+        obstacleFrequency: 150,
+        jumpVelocity: -12,
+        speedIncrement: 0.5,
+        frequencyDecrement: 5,
+        minFrequency: 100
+    },
+    mobile: {
+        width: 300,
+        height: 500,
+        characterX: 50,
+        gameSpeed: 3.5,
+        gravity: 0.5,
+        obstacleFrequency: 180,
+        jumpVelocity: -11,
+        speedIncrement: 0.3,
+        frequencyDecrement: 3,
+        minFrequency: 140
+    }
+};
+
+// ============================================
+// GAME STATE
+// ============================================
 let selectedAvatar = 'classic';
 let gameRunning = false;
 let score = 0;
 let gameSpeed = 5;
 let gravity = 0.6;
 let controlsDisabled = false;
+let isMobile = false;
+let frameCount = 0;
+let obstacleFrequency = 150;
 
 const character = {
     x: 80,
@@ -37,29 +77,31 @@ const ground = {
 
 let obstacles = [];
 let clouds = [];
-let frameCount = 0;
-let obstacleFrequency = 150;
 
-// Set canvas size
+// ============================================
+// INITIALIZATION & CONFIGURATION
+// ============================================
 function setCanvasSize() {
-    const isMobile = window.innerWidth <= 768;
+    isMobile = window.innerWidth <= 768;
+    const config = isMobile ? GAME_CONFIG.mobile : GAME_CONFIG.desktop;
 
-    if (isMobile) {
-        canvas.width = 300;
-        canvas.height = 500;
-        character.x = 50;
-        character.y = canvas.height - 100;
-        ground.y = canvas.height - 60;
-    } else {
-        canvas.width = 800;
-        canvas.height = 400;
-        character.x = 80;
-        character.y = canvas.height - 100;
-        ground.y = canvas.height - 60;
-    }
+    canvas.width = config.width;
+    canvas.height = config.height;
+    character.x = config.characterX;
+    character.y = canvas.height - 100;
+    ground.y = canvas.height - 60;
+    
+    gameSpeed = config.gameSpeed;
+    gravity = config.gravity;
+    obstacleFrequency = config.obstacleFrequency;
 
+    updateInstructions();
+}
+
+function updateInstructions() {
     const instructions = document.querySelector('.instructions');
     const gameOverP = document.querySelector('#gameOver p');
+    
     if (isMobile) {
         instructions.innerHTML = 'TAP to JUMP';
         gameOverP.innerHTML = 'TAP to restart';
@@ -69,197 +111,271 @@ function setCanvasSize() {
     }
 }
 
-setCanvasSize();
-window.addEventListener('resize', setCanvasSize);
+function playSound(audio) {
+    audio.currentTime = 0;
+    audio.play().catch(e => console.log('Audio play failed:', e));
+}
 
-// Avatar selection
+function exitToAvatarSelection() {
+    document.querySelector('.main-container').classList.add('hidden');
+    document.querySelector('.avatar-selection').classList.remove('hidden');
+    gameRunning = false;
+    controlsDisabled = false;
+    gameOverElement.classList.add('hidden');
+    canvas.style.filter = '';
+    document.querySelector('.instructions').style.visibility = 'visible';
+    
+    obstacles = [];
+    clouds = [];
+    frameCount = 0;
+    score = 0;
+    scoreElement.textContent = '0';
+    
+    character.y = canvas.height - 100;
+    character.velocityY = 0;
+    character.jumping = false;
+    character.ducking = false;
+    
+    setCanvasSize();
+}
+
+// ============================================
+// AVATAR SELECTION
+// ============================================
 function initAvatarSelection() {
     const avatarBtns = document.querySelectorAll('.avatar-btn');
 
-    avatarBtns.forEach((btn, index) => {
+    avatarBtns.forEach(btn => {
         const previewCanvas = btn.querySelector('.avatar-preview');
         const previewCtx = previewCanvas.getContext('2d');
         const avatarType = btn.dataset.avatar;
 
-        // Set canvas size to match CSS dimensions
-        const computedStyle = getComputedStyle(previewCanvas);
-        const width = parseInt(computedStyle.width);
-        const height = parseInt(computedStyle.height);
-        previewCanvas.width = width;
-        previewCanvas.height = height;
-
+        setupAvatarPreviewCanvas(previewCanvas);
         drawAvatarPreview(previewCtx, avatarType);
 
-        btn.addEventListener('click', () => {
-            selectedAvatar = avatarType;
-            playSound(selectSound);
-            document.querySelector('.avatar-selection').classList.add('hidden');
-            document.querySelector('.main-container').classList.remove('hidden');
-            setCanvasSize();
-        });
+        btn.addEventListener('click', () => selectAvatar(avatarType));
     });
 }
 
-// Draw avatar preview
+function setupAvatarPreviewCanvas(canvas) {
+    const computedStyle = getComputedStyle(canvas);
+    canvas.width = parseInt(computedStyle.width);
+    canvas.height = parseInt(computedStyle.height);
+}
+
+function selectAvatar(avatarType) {
+    selectedAvatar = avatarType;
+    playSound(SOUNDS.select);
+    document.querySelector('.avatar-selection').classList.add('hidden');
+    document.querySelector('.main-container').classList.remove('hidden');
+    setCanvasSize();
+}
+
 function drawAvatarPreview(ctx, type) {
     const canvas = ctx.canvas;
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
-    const scale = Math.min(canvas.width, canvas.height) / 120; // Scale based on 120px reference
+    const scale = Math.min(canvas.width, canvas.height) / 120;
 
-    ctx.strokeStyle = colorBlack;
+    ctx.strokeStyle = COLORS.black;
     ctx.lineWidth = 3 * scale;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
-    if (type === 'classic') {
-        ctx.beginPath();
-        ctx.arc(centerX, centerY - 10 * scale, 20 * scale, 0, Math.PI * 2);
-        ctx.stroke();
+    const avatarDrawers = {
+        classic: () => drawClassicAvatar(ctx, centerX, centerY, scale),
+        round: () => drawRoundAvatar(ctx, centerX, centerY, scale),
+        minimal: () => drawMinimalAvatar(ctx, centerX, centerY, scale)
+    };
 
-        ctx.beginPath();
-        ctx.moveTo(centerX + 10 * scale, centerY - 20 * scale);
-        ctx.lineTo(centerX + 10 * scale, centerY - 10 * scale);
-        ctx.stroke();
+    avatarDrawers[type]?.();
+}
 
-        ctx.beginPath();
-        ctx.moveTo(centerX + 5 * scale, centerY - 15 * scale);
-        ctx.lineTo(centerX + 15 * scale, centerY - 15 * scale);
-        ctx.stroke();
+function drawClassicAvatar(ctx, centerX, centerY, scale) {
+    // Head
+    ctx.beginPath();
+    ctx.arc(centerX, centerY - 10 * scale, 20 * scale, 0, Math.PI * 2);
+    ctx.stroke();
 
-        ctx.beginPath();
-        ctx.moveTo(centerX - 10 * scale, centerY + 20 * scale);
-        ctx.lineTo(centerX - 10 * scale, centerY + 35 * scale);
-        ctx.stroke();
+    // Eye
+    ctx.beginPath();
+    ctx.moveTo(centerX + 10 * scale, centerY - 20 * scale);
+    ctx.lineTo(centerX + 10 * scale, centerY - 10 * scale);
+    ctx.stroke();
 
-        ctx.beginPath();
-        ctx.moveTo(centerX + 10 * scale, centerY + 20 * scale);
-        ctx.lineTo(centerX + 10 * scale, centerY + 35 * scale);
-        ctx.stroke();
-    } else if (type === 'round') {
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, 25 * scale, 0, Math.PI * 2);
-        ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(centerX + 5 * scale, centerY - 15 * scale);
+    ctx.lineTo(centerX + 15 * scale, centerY - 15 * scale);
+    ctx.stroke();
 
-        ctx.beginPath();
-        ctx.arc(centerX - 5 * scale, centerY - 5 * scale, 3 * scale, 0, Math.PI * 2);
-        ctx.stroke();
+    // Legs
+    ctx.beginPath();
+    ctx.moveTo(centerX - 10 * scale, centerY + 20 * scale);
+    ctx.lineTo(centerX - 10 * scale, centerY + 35 * scale);
+    ctx.stroke();
 
-        ctx.beginPath();
-        ctx.arc(centerX + 5 * scale, centerY - 5 * scale, 3 * scale, 0, Math.PI * 2);
-        ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(centerX + 10 * scale, centerY + 20 * scale);
+    ctx.lineTo(centerX + 10 * scale, centerY + 35 * scale);
+    ctx.stroke();
+}
 
-        ctx.beginPath();
-        ctx.arc(centerX, centerY + 8 * scale, 10 * scale, 0, Math.PI);
-        ctx.stroke();
-    } else if (type === 'minimal') {
-        ctx.beginPath();
-        ctx.moveTo(centerX, centerY - 20 * scale);
-        ctx.lineTo(centerX, centerY + 20 * scale);
-        ctx.stroke();
+function drawRoundAvatar(ctx, centerX, centerY, scale) {
+    // Face
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 25 * scale, 0, Math.PI * 2);
+    ctx.stroke();
 
-        ctx.beginPath();
-        ctx.moveTo(centerX - 15 * scale, centerY - 5 * scale);
-        ctx.lineTo(centerX + 15 * scale, centerY - 5 * scale);
-        ctx.stroke();
+    // Eyes
+    ctx.beginPath();
+    ctx.arc(centerX - 5 * scale, centerY - 5 * scale, 3 * scale, 0, Math.PI * 2);
+    ctx.stroke();
 
-        ctx.beginPath();
-        ctx.arc(centerX, centerY - 20 * scale, 5 * scale, 0, Math.PI * 2);
-        ctx.stroke();
-    }
-}// Draw character
+    ctx.beginPath();
+    ctx.arc(centerX + 5 * scale, centerY - 5 * scale, 3 * scale, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Smile
+    ctx.beginPath();
+    ctx.arc(centerX, centerY + 8 * scale, 10 * scale, 0, Math.PI);
+    ctx.stroke();
+}
+
+function drawMinimalAvatar(ctx, centerX, centerY, scale) {
+    // Body
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY - 20 * scale);
+    ctx.lineTo(centerX, centerY + 20 * scale);
+    ctx.stroke();
+
+    // Arms
+    ctx.beginPath();
+    ctx.moveTo(centerX - 15 * scale, centerY - 5 * scale);
+    ctx.lineTo(centerX + 15 * scale, centerY - 5 * scale);
+    ctx.stroke();
+
+    // Head
+    ctx.beginPath();
+    ctx.arc(centerX, centerY - 20 * scale, 5 * scale, 0, Math.PI * 2);
+    ctx.stroke();
+}// ============================================
+// DRAWING FUNCTIONS
+// ============================================
 function drawCharacter() {
     ctx.save();
-
-    ctx.strokeStyle = colorBlack;
+    ctx.strokeStyle = COLORS.black;
     ctx.lineWidth = 4;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
-    if (selectedAvatar === 'classic') {
-        if (character.ducking && !character.jumping) {
-            ctx.beginPath();
-            ctx.arc(character.x + 20, character.y + 20, 12, 0, Math.PI * 2);
-            ctx.stroke();
+    const characterDrawers = {
+        classic: () => drawClassicCharacter(),
+        round: () => drawRoundCharacter(),
+        minimal: () => drawMinimalCharacter()
+    };
 
-            ctx.beginPath();
-            ctx.moveTo(character.x + 32, character.y + 16);
-            ctx.lineTo(character.x + 32, character.y + 24);
-            ctx.stroke();
-        } else {
-            ctx.beginPath();
-            ctx.arc(character.x + 16, character.y + 16, 16, 0, Math.PI * 2);
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(character.x + 24, character.y + 8);
-            ctx.lineTo(character.x + 24, character.y + 16);
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(character.x + 20, character.y + 12);
-            ctx.lineTo(character.x + 28, character.y + 12);
-            ctx.stroke();
-
-            const legOffset = Math.floor(frameCount / 8) % 2 === 0 ? 0 : 3;
-            ctx.beginPath();
-            ctx.moveTo(character.x + 8, character.y + 32);
-            ctx.lineTo(character.x + 8, character.y + 42 + legOffset);
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(character.x + 24, character.y + 32);
-            ctx.lineTo(character.x + 24, character.y + 42 - legOffset);
-            ctx.stroke();
-        }
-    } else if (selectedAvatar === 'round') {
-        const size = character.ducking ? 18 : 20;
-        ctx.beginPath();
-        ctx.arc(character.x + 16, character.y + size, size, 0, Math.PI * 2);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(character.x + 12, character.y + size - 5, 2, 0, Math.PI * 2);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(character.x + 20, character.y + size - 5, 2, 0, Math.PI * 2);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(character.x + 16, character.y + size + 5, 8, 0, Math.PI);
-        ctx.stroke();
-    } else if (selectedAvatar === 'minimal') {
-        const height = character.ducking ? 25 : 35;
-        ctx.beginPath();
-        ctx.moveTo(character.x + 16, character.y + 5);
-        ctx.lineTo(character.x + 16, character.y + height);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(character.x + 5, character.y + 15);
-        ctx.lineTo(character.x + 27, character.y + 15);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(character.x + 16, character.y + 5, 4, 0, Math.PI * 2);
-        ctx.stroke();
-    }
-
+    characterDrawers[selectedAvatar]?.();
     ctx.restore();
 }
 
-// Draw ground
+function drawClassicCharacter() {
+    if (character.ducking && !character.jumping) {
+        // Ducking pose
+        ctx.beginPath();
+        ctx.arc(character.x + 20, character.y + 20, 12, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(character.x + 32, character.y + 16);
+        ctx.lineTo(character.x + 32, character.y + 24);
+        ctx.stroke();
+    } else {
+        // Standing/jumping pose
+        ctx.beginPath();
+        ctx.arc(character.x + 16, character.y + 16, 16, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Eye
+        ctx.beginPath();
+        ctx.moveTo(character.x + 24, character.y + 8);
+        ctx.lineTo(character.x + 24, character.y + 16);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(character.x + 20, character.y + 12);
+        ctx.lineTo(character.x + 28, character.y + 12);
+        ctx.stroke();
+
+        // Animated legs
+        const legOffset = Math.floor(frameCount / 8) % 2 === 0 ? 0 : 3;
+        ctx.beginPath();
+        ctx.moveTo(character.x + 8, character.y + 32);
+        ctx.lineTo(character.x + 8, character.y + 42 + legOffset);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(character.x + 24, character.y + 32);
+        ctx.lineTo(character.x + 24, character.y + 42 - legOffset);
+        ctx.stroke();
+    }
+}
+
+function drawRoundCharacter() {
+    const size = character.ducking ? 18 : 20;
+    
+    // Face
+    ctx.beginPath();
+    ctx.arc(character.x + 16, character.y + size, size, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Eyes
+    ctx.beginPath();
+    ctx.arc(character.x + 12, character.y + size - 5, 2, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(character.x + 20, character.y + size - 5, 2, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Smile
+    ctx.beginPath();
+    ctx.arc(character.x + 16, character.y + size + 5, 8, 0, Math.PI);
+    ctx.stroke();
+}
+
+function drawMinimalCharacter() {
+    const height = character.ducking ? 25 : 35;
+    
+    // Body
+    ctx.beginPath();
+    ctx.moveTo(character.x + 16, character.y + 5);
+    ctx.lineTo(character.x + 16, character.y + height);
+    ctx.stroke();
+
+    // Arms
+    ctx.beginPath();
+    ctx.moveTo(character.x + 5, character.y + 15);
+    ctx.lineTo(character.x + 27, character.y + 15);
+    ctx.stroke();
+
+    // Head
+    ctx.beginPath();
+    ctx.arc(character.x + 16, character.y + 5, 4, 0, Math.PI * 2);
+    ctx.stroke();
+}
+
 function drawGround() {
-    ctx.strokeStyle = colorBlack;
+    ctx.strokeStyle = COLORS.black;
     ctx.lineWidth = 3;
     ctx.lineCap = 'round';
 
+    // Main ground line
     ctx.beginPath();
     ctx.moveTo(0, ground.y);
     ctx.lineTo(canvas.width, ground.y);
     ctx.stroke();
 
+    // Animated ground details
     const spacing = 60;
     const offset = (frameCount * gameSpeed) % spacing;
 
@@ -278,93 +394,64 @@ function drawGround() {
     }
 }
 
-// Create obstacle
-function createObstacle() {
-    const type = Math.random() > 0.5 ? 'pipe' : 'goomba';
-    const obstacle = {
-        x: canvas.width,
-        width: type === 'pipe' ? 32 : 24,
-        height: type === 'pipe' ? 48 : 24,
-        y: type === 'pipe' ? ground.y - 48 : ground.y - 24,
-        type: type
-    };
-    obstacles.push(obstacle);
-}
-
-// Draw obstacles
 function drawObstacles() {
     obstacles.forEach(obstacle => {
         ctx.save();
-
-        ctx.strokeStyle = colorBlack;
+        ctx.strokeStyle = COLORS.black;
         ctx.lineWidth = 4;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
 
         if (obstacle.type === 'pipe') {
-            ctx.beginPath();
-            ctx.roundRect(obstacle.x + 4, obstacle.y + 4, obstacle.width - 8, obstacle.height - 8, 8);
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.roundRect(obstacle.x + 12, obstacle.y + 12, obstacle.width - 24, obstacle.height - 24, 4);
-            ctx.stroke();
+            drawPipeObstacle(obstacle);
         } else {
-            const bounce = Math.sin(frameCount * 0.15) * 2;
-            const y = obstacle.y + bounce;
-
-            ctx.beginPath();
-            ctx.arc(obstacle.x + obstacle.width / 2, y + obstacle.height / 2, obstacle.width / 2 - 2, 0, Math.PI * 2);
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.arc(obstacle.x + obstacle.width / 2 - 6, y + obstacle.height / 2 - 4, 2, 0, Math.PI * 2);
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.arc(obstacle.x + obstacle.width / 2 + 6, y + obstacle.height / 2 - 4, 2, 0, Math.PI * 2);
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.arc(obstacle.x + obstacle.width / 2, y + obstacle.height / 2 + 6, 6, 0, Math.PI);
-            ctx.stroke();
+            drawGoombaObstacle(obstacle);
         }
 
         ctx.restore();
     });
 }
 
-// Update obstacles
-function updateObstacles() {
-    if (gameRunning) {
-        obstacles.forEach(obstacle => {
-            obstacle.x -= gameSpeed;
-        });
+function drawPipeObstacle(obstacle) {
+    ctx.beginPath();
+    ctx.roundRect(obstacle.x + 4, obstacle.y + 4, obstacle.width - 8, obstacle.height - 8, 8);
+    ctx.stroke();
 
-        obstacles = obstacles.filter(obstacle => obstacle.x + obstacle.width > 0);
-
-        if (frameCount % obstacleFrequency === 0) {
-            createObstacle();
-        }
-    }
+    ctx.beginPath();
+    ctx.roundRect(obstacle.x + 12, obstacle.y + 12, obstacle.width - 24, obstacle.height - 24, 4);
+    ctx.stroke();
 }
 
-// Create cloud
-function createCloud() {
-    clouds.push({
-        x: canvas.width,
-        y: Math.random() * 80 + 20,
-        width: 40,
-        height: 20
-    });
+function drawGoombaObstacle(obstacle) {
+    const bounce = Math.sin(frameCount * 0.15) * 2;
+    const y = obstacle.y + bounce;
+    const centerX = obstacle.x + obstacle.width / 2;
+    const centerY = y + obstacle.height / 2;
+
+    // Face
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, obstacle.width / 2 - 2, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Eyes
+    ctx.beginPath();
+    ctx.arc(centerX - 6, centerY - 4, 2, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(centerX + 6, centerY - 4, 2, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Frown
+    ctx.beginPath();
+    ctx.arc(centerX, centerY + 6, 6, 0, Math.PI);
+    ctx.stroke();
 }
 
-// Draw clouds
 function drawClouds() {
     clouds.forEach(cloud => {
         ctx.save();
-
-        ctx.strokeStyle = colorBlack;
+        ctx.strokeStyle = COLORS.black;
         ctx.lineWidth = 3;
         ctx.lineCap = 'round';
 
@@ -384,53 +471,86 @@ function drawClouds() {
     });
 }
 
-// Update clouds
+// ============================================
+// UPDATE FUNCTIONS
+// ============================================
+function createObstacle() {
+    const type = Math.random() > 0.5 ? 'pipe' : 'goomba';
+    obstacles.push({
+        x: canvas.width,
+        width: type === 'pipe' ? 32 : 24,
+        height: type === 'pipe' ? 48 : 24,
+        y: type === 'pipe' ? ground.y - 48 : ground.y - 24,
+        type
+    });
+}
+
+function updateObstacles() {
+    if (!gameRunning) return;
+
+    obstacles.forEach(obstacle => obstacle.x -= gameSpeed);
+    obstacles = obstacles.filter(obstacle => obstacle.x + obstacle.width > 0);
+
+    if (frameCount % obstacleFrequency === 0) {
+        createObstacle();
+    }
+}
+
+function createCloud() {
+    clouds.push({
+        x: canvas.width,
+        y: Math.random() * 80 + 20,
+        width: 40,
+        height: 20
+    });
+}
+
 function updateClouds() {
-    if (gameRunning) {
-        clouds.forEach(cloud => {
-            cloud.x -= gameSpeed * 0.5;
-        });
+    if (!gameRunning) return;
 
-        clouds = clouds.filter(cloud => cloud.x + cloud.width > 0);
+    clouds.forEach(cloud => cloud.x -= gameSpeed * 0.5);
+    clouds = clouds.filter(cloud => cloud.x + cloud.width > 0);
 
-        if (frameCount % 200 === 0) {
-            createCloud();
-        }
+    if (frameCount % 200 === 0) {
+        createCloud();
     }
 }
 
-// Jump
+function updateCharacter() {
+    if (!character.jumping) return;
+
+    character.velocityY += gravity;
+    character.y += character.velocityY;
+
+    const groundLevel = canvas.height - 100;
+    if (character.y >= groundLevel) {
+        character.y = groundLevel;
+        character.velocityY = 0;
+        character.jumping = false;
+    }
+}
+
+// ============================================
+// CHARACTER ACTIONS
+// ============================================
 function jump() {
-    if (!character.jumping && !character.ducking) {
-        character.velocityY = -12;
-        character.jumping = true;
-        playSound(jumpSound);
-    }
+    if (character.jumping || character.ducking) return;
+
+    const config = isMobile ? GAME_CONFIG.mobile : GAME_CONFIG.desktop;
+    character.velocityY = config.jumpVelocity;
+    character.jumping = true;
+    playSound(SOUNDS.jump);
 }
 
-// Duck
 function duck(isDucking) {
     if (!character.jumping) {
         character.ducking = isDucking;
     }
 }
 
-// Update character
-function updateCharacter() {
-    if (character.jumping) {
-        character.velocityY += gravity;
-        character.y += character.velocityY;
-
-        const groundLevel = canvas.height - 100;
-        if (character.y >= groundLevel) {
-            character.y = groundLevel;
-            character.velocityY = 0;
-            character.jumping = false;
-        }
-    }
-}
-
-// Check collision
+// ============================================
+// GAME LOGIC
+// ============================================
 function checkCollision() {
     const characterBox = {
         x: character.x + 5,
@@ -439,83 +559,84 @@ function checkCollision() {
         height: character.ducking ? character.height - 20 : character.height
     };
 
-    for (let obstacle of obstacles) {
-        if (characterBox.x < obstacle.x + obstacle.width &&
-            characterBox.x + characterBox.width > obstacle.x &&
-            characterBox.y < obstacle.y + obstacle.height &&
-            characterBox.y + characterBox.height > obstacle.y) {
-            return true;
-        }
-    }
-    return false;
+    return obstacles.some(obstacle => 
+        characterBox.x < obstacle.x + obstacle.width &&
+        characterBox.x + characterBox.width > obstacle.x &&
+        characterBox.y < obstacle.y + obstacle.height &&
+        characterBox.y + characterBox.height > obstacle.y
+    );
 }
 
-// Update score
 function updateScore() {
-    if (gameRunning) {
-        const oldScore = Math.floor(score / 10);
-        score++;
-        const newScore = Math.floor(score / 10);
-        scoreElement.textContent = newScore;
+    if (!gameRunning) return;
 
-        if (score % 500 === 0) {
-            gameSpeed += 0.5;
-            obstacleFrequency = Math.max(100, obstacleFrequency - 5);
-        }
+    score++;
+    scoreElement.textContent = Math.floor(score / 10);
+
+    if (score % 500 === 0) {
+        increaseDifficulty();
     }
 }
 
-// Game over
+function increaseDifficulty() {
+    const config = isMobile ? GAME_CONFIG.mobile : GAME_CONFIG.desktop;
+    gameSpeed += config.speedIncrement;
+    obstacleFrequency = Math.max(config.minFrequency, obstacleFrequency - config.frequencyDecrement);
+}
+
 function gameOver() {
     gameRunning = false;
     controlsDisabled = true;
     gameOverElement.classList.remove('hidden');
     canvas.style.filter = 'brightness(0.5)';
     canvas.classList.add('shake');
-    playSound(gameOverSound);
+    playSound(SOUNDS.gameOver);
+    
     setTimeout(() => canvas.classList.remove('shake'), 500);
     setTimeout(() => controlsDisabled = false, 1000);
 }
 
-// Play sound
-function playSound(audio) {
-    audio.currentTime = 0;
-    audio.play().catch(e => console.log('Audio play failed:', e));
-}
-
-// Reset game
 function resetGame() {
     gameRunning = true;
     score = 0;
-    gameSpeed = 5;
-    obstacleFrequency = 150;
+    frameCount = 0;
     obstacles = [];
     clouds = [];
-    frameCount = 0;
+    
+    const config = isMobile ? GAME_CONFIG.mobile : GAME_CONFIG.desktop;
+    gameSpeed = config.gameSpeed;
+    obstacleFrequency = config.obstacleFrequency;
+    gravity = config.gravity;
 
     character.y = canvas.height - 100;
     character.velocityY = 0;
     character.jumping = false;
     character.ducking = false;
+    
     gameOverElement.classList.add('hidden');
     document.querySelector('.instructions').style.visibility = 'hidden';
     canvas.style.filter = '';
     scoreElement.textContent = '0';
 }
 
-// Game loop
+// ============================================
+// GAME LOOP
+// ============================================
 function gameLoop() {
-    ctx.fillStyle = colorRed;
+    // Clear and draw background
+    ctx.fillStyle = COLORS.red;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // Draw scene
     drawClouds();
-    updateClouds();
     drawGround();
     drawCharacter();
     drawObstacles();
 
+    // Update game state
     if (gameRunning) {
         updateCharacter();
+        updateClouds();
         updateObstacles();
         updateScore();
         frameCount++;
@@ -528,88 +649,73 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
-// Controls
-document.addEventListener('keydown', (e) => {
+// ============================================
+// EVENT HANDLERS
+// ============================================
+function handleKeyDown(e) {
     if (e.code === 'Escape') {
         e.preventDefault();
-        document.querySelector('.main-container').classList.add('hidden');
-        document.querySelector('.avatar-selection').classList.remove('hidden');
-        gameRunning = false;
-        controlsDisabled = false;
-        gameOverElement.classList.add('hidden');
-        canvas.style.filter = '';
-        document.querySelector('.instructions').style.visibility = 'visible';
-        obstacles = [];
-        clouds = [];
-        frameCount = 0;
-        score = 0;
-        gameSpeed = 5;
-        obstacleFrequency = 150;
-        scoreElement.textContent = '0';
-        character.y = canvas.height - 100;
-        character.velocityY = 0;
-        character.jumping = false;
-        character.ducking = false;
+        exitToAvatarSelection();
         return;
     }
+    
     if (e.code === 'Space') {
         e.preventDefault();
         if (controlsDisabled) return;
+        
         if (!gameRunning) {
             resetGame();
         } else {
             jump();
         }
     }
+    
     if (e.code === 'ArrowDown') {
         e.preventDefault();
         duck(true);
     }
-});
+}
 
-document.addEventListener('keyup', (e) => {
+function handleKeyUp(e) {
     if (e.code === 'ArrowDown') {
         e.preventDefault();
         duck(false);
     }
-});
+}
 
-canvas.addEventListener('touchstart', (e) => {
+function handleTouchStart(e) {
     e.preventDefault();
     if (controlsDisabled) return;
+    
     if (!gameRunning) {
         resetGame();
     } else {
         jump();
     }
-});
+}
 
-canvas.addEventListener('touchend', (e) => {
+function handleTouchEnd(e) {
     e.preventDefault();
-});
+}
 
-// Exit to avatar selection
-document.getElementById('exit').addEventListener('click', () => {
-    document.querySelector('.main-container').classList.add('hidden');
-    document.querySelector('.avatar-selection').classList.remove('hidden');
-    gameRunning = false;
-    controlsDisabled = false;
-    gameOverElement.classList.add('hidden');
-    canvas.style.filter = '';
-    document.querySelector('.instructions').style.visibility = 'visible';
-    obstacles = [];
-    clouds = [];
-    frameCount = 0;
-    score = 0;
-    gameSpeed = 5;
-    obstacleFrequency = 150;
-    scoreElement.textContent = '0';
-    character.y = canvas.height - 100;
-    character.velocityY = 0;
-    character.jumping = false;
-    character.ducking = false;
-});
+// ============================================
+// INITIALIZATION
+// ============================================
+function init() {
+    setCanvasSize();
+    initAvatarSelection();
+    
+    // Event listeners
+    window.addEventListener('resize', setCanvasSize);
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
+    canvas.addEventListener('touchstart', handleTouchStart);
+    canvas.addEventListener('touchend', handleTouchEnd);
+    document.getElementById('exit').addEventListener('click', exitToAvatarSelection);
+    
+    // Start game loop
+    gameLoop();
+}
 
-// Initialize
-initAvatarSelection();
-gameLoop();
+// Start the game
+init();
