@@ -115,6 +115,7 @@ function playSound(audio) {
 function exitToAvatarSelection() {
     document.querySelector('.main-container').classList.add('hidden');
     document.querySelector('.avatar-selection').classList.remove('hidden');
+    document.body.classList.remove('game-active');
     gameRunning = false;
     controlsDisabled = false;
     gameOverElement.classList.add('hidden');
@@ -163,6 +164,7 @@ function selectAvatar(avatarType) {
     playSound(SOUNDS.select);
     document.querySelector('.avatar-selection').classList.add('hidden');
     document.querySelector('.main-container').classList.remove('hidden');
+    document.body.classList.add('game-active');
     setCanvasSize();
 }
 
@@ -578,6 +580,7 @@ function increaseDifficulty() {
 function gameOver() {
     gameRunning = false;
     controlsDisabled = true;
+    document.body.classList.remove('game-active');
     gameOverElement.classList.remove('hidden');
     canvas.style.filter = 'brightness(0.5)';
     canvas.classList.add('shake');
@@ -589,6 +592,7 @@ function gameOver() {
 
 function resetGame() {
     gameRunning = true;
+    document.body.classList.add('game-active');
     score = 0;
     frameCount = 0;
     obstacles = [];

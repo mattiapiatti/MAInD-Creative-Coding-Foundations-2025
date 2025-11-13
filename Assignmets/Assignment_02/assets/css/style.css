@@ -1,6 +1,4 @@
-/* ============================================
-   LAYOUT COMPONENTS
-   ============================================ */
+/* Layout Components */
 .logo {
     width: 100%;
     max-width: var(--canvas-width);
@@ -29,9 +27,7 @@
     text-align: center;
 }
 
-/* ============================================
-   GAME CONTAINER
-   ============================================ */
+/* Game Container */
 .game-container {
     position: relative;
     display: flex;
@@ -72,9 +68,7 @@
     user-select: none;
 }
 
-/* ============================================
-   GAME OVER SCREEN
-   ============================================ */
+/* Game Over Screen */
 .game-over {
     position: absolute;
     text-align: center;
@@ -118,16 +112,12 @@
     transform: scale(1.05);
 }
 
-/* ============================================
-   UTILITY CLASSES
-   ============================================ */
+/* Utility Classes */
 .hidden {
     display: none !important;
 }
 
-/* ============================================
-   AVATAR SELECTION
-   ============================================ */
+/* Avatar Selection */
 .avatar-options {
     display: flex;
     gap: var(--spacing-large);
@@ -176,9 +166,7 @@
     letter-spacing: 0.05rem;
 }
 
-/* ============================================
-   ANIMATIONS
-   ============================================ */
+/* Animations */
 .shake {
     animation: shake 0.5s ease-in-out;
 }
@@ -200,9 +188,7 @@
     }
 }
 
-/* ============================================
-   MOBILE RESPONSIVE
-   ============================================ */
+/* Mobile Responsiveness */
 @media (max-width: 768px) {
 
     /* Layout */
