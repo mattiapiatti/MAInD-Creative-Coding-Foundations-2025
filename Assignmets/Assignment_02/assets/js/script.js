@@ -34,7 +34,7 @@ let clouds = [];
 let frameCount = 0;
 let obstacleFrequency = 150;
 
-// Set canvas size and positions
+// Set canvas size
 function setCanvasSize() {
     const isMobile = window.innerWidth <= 768;
 
@@ -50,6 +50,16 @@ function setCanvasSize() {
         character.x = 80;
         character.y = canvas.height - 100;
         ground.y = canvas.height - 60;
+    }
+
+    const instructions = document.querySelector('.instructions');
+    const gameOverP = document.querySelector('#gameOver p');
+    if (isMobile) {
+        instructions.innerHTML = 'TAP to JUMP';
+        gameOverP.innerHTML = 'TAP to restart';
+    } else {
+        instructions.innerHTML = 'Press SPACE to JUMP';
+        gameOverP.innerHTML = 'Press SPACE to restart';
     }
 }
 
@@ -321,6 +331,9 @@ function updateScore() {
 function gameOver() {
     gameRunning = false;
     gameOverElement.classList.remove('hidden');
+    canvas.style.filter = 'brightness(0.5)';
+    canvas.classList.add('shake');
+    setTimeout(() => canvas.classList.remove('shake'), 500);
 }
 
 // Reset game
@@ -338,6 +351,8 @@ function resetGame() {
     character.jumping = false;
     character.ducking = false;
     gameOverElement.classList.add('hidden');
+    document.querySelector('.instructions').classList.add('hidden');
+    canvas.style.filter = '';
     scoreElement.textContent = '0';
 }
 

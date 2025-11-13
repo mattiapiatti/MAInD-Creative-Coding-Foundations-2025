@@ -42,4 +42,5 @@ body {
     min-height: 100vh;
     background: var(--color-gray);
     padding: var(--spacing-small);
+    cursor: none;
 }
