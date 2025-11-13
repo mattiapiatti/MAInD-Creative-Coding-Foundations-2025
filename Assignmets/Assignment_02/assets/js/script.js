@@ -81,6 +81,13 @@ function initAvatarSelection() {
         const previewCtx = previewCanvas.getContext('2d');
         const avatarType = btn.dataset.avatar;
 
+        // Set canvas size to match CSS dimensions
+        const computedStyle = getComputedStyle(previewCanvas);
+        const width = parseInt(computedStyle.width);
+        const height = parseInt(computedStyle.height);
+        previewCanvas.width = width;
+        previewCanvas.height = height;
+
         drawAvatarPreview(previewCtx, avatarType);
 
         btn.addEventListener('click', () => {
@@ -95,69 +102,72 @@ function initAvatarSelection() {
 
 // Draw avatar preview
 function drawAvatarPreview(ctx, type) {
+    const canvas = ctx.canvas;
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const scale = Math.min(canvas.width, canvas.height) / 120; // Scale based on 120px reference
+
     ctx.strokeStyle = colorBlack;
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 3 * scale;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
     if (type === 'classic') {
         ctx.beginPath();
-        ctx.arc(60, 50, 20, 0, Math.PI * 2);
+        ctx.arc(centerX, centerY - 10 * scale, 20 * scale, 0, Math.PI * 2);
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.moveTo(70, 40);
-        ctx.lineTo(70, 50);
+        ctx.moveTo(centerX + 10 * scale, centerY - 20 * scale);
+        ctx.lineTo(centerX + 10 * scale, centerY - 10 * scale);
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.moveTo(65, 45);
-        ctx.lineTo(75, 45);
+        ctx.moveTo(centerX + 5 * scale, centerY - 15 * scale);
+        ctx.lineTo(centerX + 15 * scale, centerY - 15 * scale);
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.moveTo(50, 70);
-        ctx.lineTo(50, 85);
+        ctx.moveTo(centerX - 10 * scale, centerY + 20 * scale);
+        ctx.lineTo(centerX - 10 * scale, centerY + 35 * scale);
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.moveTo(70, 70);
-        ctx.lineTo(70, 85);
+        ctx.moveTo(centerX + 10 * scale, centerY + 20 * scale);
+        ctx.lineTo(centerX + 10 * scale, centerY + 35 * scale);
         ctx.stroke();
     } else if (type === 'round') {
         ctx.beginPath();
-        ctx.arc(60, 60, 25, 0, Math.PI * 2);
+        ctx.arc(centerX, centerY, 25 * scale, 0, Math.PI * 2);
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.arc(55, 55, 3, 0, Math.PI * 2);
+        ctx.arc(centerX - 5 * scale, centerY - 5 * scale, 3 * scale, 0, Math.PI * 2);
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.arc(65, 55, 3, 0, Math.PI * 2);
+        ctx.arc(centerX + 5 * scale, centerY - 5 * scale, 3 * scale, 0, Math.PI * 2);
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.arc(60, 68, 10, 0, Math.PI);
+        ctx.arc(centerX, centerY + 8 * scale, 10 * scale, 0, Math.PI);
         ctx.stroke();
     } else if (type === 'minimal') {
         ctx.beginPath();
-        ctx.moveTo(60, 40);
-        ctx.lineTo(60, 80);
+        ctx.moveTo(centerX, centerY - 20 * scale);
+        ctx.lineTo(centerX, centerY + 20 * scale);
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.moveTo(45, 55);
-        ctx.lineTo(75, 55);
+        ctx.moveTo(centerX - 15 * scale, centerY - 5 * scale);
+        ctx.lineTo(centerX + 15 * scale, centerY - 5 * scale);
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.arc(60, 40, 5, 0, Math.PI * 2);
+        ctx.arc(centerX, centerY - 20 * scale, 5 * scale, 0, Math.PI * 2);
         ctx.stroke();
     }
-}
-
-// Draw character
+}// Draw character
 function drawCharacter() {
     ctx.save();
 
@@ -520,6 +530,28 @@ function gameLoop() {
 
 // Controls
 document.addEventListener('keydown', (e) => {
+    if (e.code === 'Escape') {
+        e.preventDefault();
+        document.querySelector('.main-container').classList.add('hidden');
+        document.querySelector('.avatar-selection').classList.remove('hidden');
+        gameRunning = false;
+        controlsDisabled = false;
+        gameOverElement.classList.add('hidden');
+        canvas.style.filter = '';
+        document.querySelector('.instructions').style.visibility = 'visible';
+        obstacles = [];
+        clouds = [];
+        frameCount = 0;
+        score = 0;
+        gameSpeed = 5;
+        obstacleFrequency = 150;
+        scoreElement.textContent = '0';
+        character.y = canvas.height - 100;
+        character.velocityY = 0;
+        character.jumping = false;
+        character.ducking = false;
+        return;
+    }
     if (e.code === 'Space') {
         e.preventDefault();
         if (controlsDisabled) return;
