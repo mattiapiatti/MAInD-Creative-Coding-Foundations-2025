@@ -1,15 +1,80 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <meta charset="utf-8">
-    <title>Creative Coding Foundations 2025</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creative Coding Foundations - MAInD 2025</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/global.css">
+    <link rel="stylesheet" href="assets/css/style.css">
 </head>
+
 <body>
-    <h1>Progetti</h1>
-    <ul>
-        <li><a href="progetto1/">Progetto 1</a></li>
-        <li><a href="progetto2/">Progetto 2</a></li>
-        <li><a href="progetto3/">Progetto 3</a></li>
-    </ul>
+    <nav class="main-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <span class="brand-text">MAInD</span>
+                <span class="brand-year">2025</span>
+                <span class="brand-separator">|</span>
+                <span class="brand-username">Mattia Piatti</span>
+            </div>
+            <div class="nav-links">
+                <button class="nav-link active" data-tab="assignments">Assignments</button>
+                <button class="nav-link" data-tab="lessons">Lessons</button>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1 class="hero-title">
+                    <span class="title-line">Creative Coding</span>
+                    <span class="title-line">Foundations</span>
+                </h1>
+            </div>
+        </section>
+
+        <section class="projects-section">
+            <div class="container">
+                <div id="assignments" class="tab-content active">
+                    <div class="projects-grid" id="assignments-grid"></div>
+                </div>
+                <div id="lessons" class="tab-content">
+                    <div class="projects-grid" id="lessons-grid"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title"></h2>
+                <button class="close-btn" id="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-tabs">
+                    <button class="modal-tab-btn active" data-view="preview">Preview</button>
+                    <button class="modal-tab-btn" data-view="code">Code</button>
+                </div>
+                <div class="modal-views">
+                    <div id="preview-view" class="modal-view active">
+                        <iframe id="project-frame" frameborder="0"></iframe>
+                    </div>
+                    <div id="code-view" class="modal-view">
+                        <div class="file-selector" id="file-selector"></div>
+                        <pre id="code-display"><code></code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/main.js"></script>
 </body>
+
 </html>
