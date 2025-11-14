@@ -1,4 +1,4 @@
-// Configurazione progetti
+// Project Configuration
 const projects = {
     assignments: [
         {
@@ -26,14 +26,79 @@ const projects = {
 
 let currentProject = null;
 
-// Inizializzazione
+// Initialization
 document.addEventListener('DOMContentLoaded', () => {
+    fetchRepoOwner();
     initializeTabs();
     renderProjects();
     initializeModal();
 });
 
-// Gestione tabs principali
+// Fetch repository owner from GitHub API
+async function fetchRepoOwner() {
+    const repoOwnerElement = document.getElementById('repo-owner');
+    
+    try {
+        let repoOwner = null;
+        let repoName = null;
+        
+        const metaRepo = document.querySelector('meta[name="github:repo"]');
+        if (metaRepo) {
+            const repoFullName = metaRepo.content;
+            [repoOwner, repoName] = repoFullName.split('/');
+        }
+        
+        if (!repoOwner || !repoName) {
+            const pathParts = window.location.pathname.split('/').filter(p => p);
+            const repoPattern = pathParts.find(part => 
+                part.includes('MAInD') || part.includes('Creative-Coding') || part.includes('Foundations')
+            );
+            
+            if (repoPattern) {
+                repoName = repoPattern;
+                repoOwner = 'mattiapiatti';
+            }
+        }
+        
+        if (repoOwner && repoName) {
+            const response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}`);
+            
+            if (response.ok) {
+                const data = await response.json();
+                const ownerName = data.owner.name || data.owner.login;
+                repoOwnerElement.textContent = ownerName;
+                return;
+            }
+        }
+        
+        // Fallback
+        try {
+            const gitConfigResponse = await fetch('/.git/config');
+            if (gitConfigResponse.ok) {
+                const gitConfig = await gitConfigResponse.text();
+                const match = gitConfig.match(/github\.com[:/]([^/]+)\/([^.]+)/);
+                if (match) {
+                    repoOwner = match[1];
+                    const response = await fetch(`https://api.github.com/users/${repoOwner}`);
+                    if (response.ok) {
+                        const userData = await response.json();
+                        repoOwnerElement.textContent = userData.name || userData.login;
+                        return;
+                    }
+                }
+            }
+        } catch (e) {
+        }
+        
+        repoOwnerElement.textContent = repoOwner || 'Repository Owner';
+        
+    } catch (error) {
+        console.error('Error fetching repo owner:', error);
+        repoOwnerElement.textContent = 'Repository Owner';
+    }
+}
+
+// Main tabs handling
 function initializeTabs() {
     const tabButtons = document.querySelectorAll('.nav-link');
     
@@ -41,18 +106,16 @@ function initializeTabs() {
         btn.addEventListener('click', () => {
             const tabId = btn.dataset.tab;
             
-            // Rimuovi active da tutti i bottoni e contenuti
             document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             
-            // Aggiungi active al bottone e contenuto selezionato
             btn.classList.add('active');
             document.getElementById(tabId).classList.add('active');
         });
     });
 }
 
-// Render progetti
+// Render projects
 function renderProjects() {
     renderProjectGrid('assignments', projects.assignments);
     renderProjectGrid('lessons', projects.lessons);
@@ -120,7 +183,7 @@ function initializeModal() {
         });
     });
     
-    // Chiudi modal con ESC
+    // Close modal with ESC
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && modal.classList.contains('active')) {
             closeModal();
@@ -140,7 +203,6 @@ function openProject(project) {
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
     
-    // Reset alla vista preview
     document.querySelectorAll('.modal-tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.modal-view').forEach(v => v.classList.remove('active'));
     document.querySelector('[data-view="preview"]').classList.add('active');
@@ -153,11 +215,10 @@ function closeModal() {
     document.body.style.overflow = '';
     currentProject = null;
     
-    // Reset iframe
     document.getElementById('project-frame').src = '';
 }
 
-// Caricamento file del progetto
+// Load project files
 async function loadProjectFiles(project) {
     const fileSelector = document.getElementById('file-selector');
     fileSelector.innerHTML = '';
@@ -170,7 +231,7 @@ async function loadProjectFiles(project) {
         fileSelector.appendChild(btn);
     });
     
-    // Carica il primo file automaticamente
+    // Load the first file automatically
     if (project.files.length > 0) {
         const firstBtn = fileSelector.querySelector('.file-btn');
         firstBtn.click();
@@ -178,7 +239,6 @@ async function loadProjectFiles(project) {
 }
 
 async function loadFile(filePath, button) {
-    // Rimuovi active da tutti i bottoni
     document.querySelectorAll('.file-btn').forEach(b => b.classList.remove('active'));
     button.classList.add('active');
     
@@ -200,24 +260,14 @@ async function loadFile(filePath, button) {
 }
 
 function highlightCode(element, filePath) {
-    // Semplice highlighting - puoi integrare librerie come Prism.js o Highlight.js
     const ext = filePath.split('.').pop().toLowerCase();
     element.className = `language-${ext}`;
     
-    // Puoi aggiungere qui l'integrazione con una libreria di syntax highlighting
+    // Add there the integration with a syntax highlighting library here
+
 }
 
-// Keyboard shortcuts
-document.addEventListener('keydown', (e) => {
-    if (e.ctrlKey || e.metaKey) {
-        if (e.key === 'k') {
-            e.preventDefault();
-            // Potresti aggiungere una funzione di ricerca veloce
-        }
-    }
-});
-
-// Gestione errori iframe
+// Iframe error handling
 window.addEventListener('error', (e) => {
     if (e.target.tagName === 'IFRAME') {
         console.error('Error loading project:', e);

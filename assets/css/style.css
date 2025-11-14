@@ -138,7 +138,7 @@
     background: var(--grey-darker);
     border: 1px solid var(--grey-dark);
     border-radius: 10px;
-    padding: var(--space-xl);
+    padding: var(--space-md);
     cursor: pointer;
     position: relative;
     transition: var(--transition);
@@ -194,6 +194,7 @@
     background: transparent;
     color: var(--grey-light);
     border: 1px solid var(--grey-dark);
+    border-radius: 10px;
     padding: var(--space-2xs) var(--space-sm);
     font-size: var(--font-size-xs);
     font-weight: var(--font-medium);
@@ -239,6 +240,7 @@
 
 .modal-content {
     background: var(--black);
+    width: 100vw;
     height: 100vh;
     display: flex;
     flex-direction: column;
@@ -376,8 +378,9 @@
     padding: 5px 10px;
     cursor: pointer;
     transition: var(--transition);
-    font-size: var(--font-size-xs);
-    font-family: 'Courier New', 'Monaco', monospace;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-medium);
+    font-family: var(--font-family-variant);
     color: var(--grey-medium);
     text-transform: uppercase;
     letter-spacing: 0.05em;
